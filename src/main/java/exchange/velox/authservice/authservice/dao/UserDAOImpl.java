@@ -65,15 +65,41 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
+    public boolean getCompanyStatusByUser(UserDTO userDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+        boolean isActive = false;
+        if (userDTO.getRole().equals(UserRole.SELLER.name())) {
+            queryBuilder.append("select u.active from user u " +
+                                            "inner join sellerUser su on su.seller_Id = u.id " +
+                                            "and su.id = ?1");
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+            queryBuilder.append("select u.active from user u " +
+                                            "inner join bidderUser bu on bu.bidder_Id = u.id " +
+                                            "and bu.id = ?1");
+        } else {
+            return true;
+        }
+        Query query = entityManager.createNativeQuery(queryBuilder.toString());
+        query.setParameter(1, userDTO.getId());
+        try {
+            isActive = (boolean) query.getSingleResult();
+        } catch (Exception e) {
+            // ignore
+        }
+        return isActive;
+    }
+
+    @Override
     public Set<String> getPermissionListByUser(UserDTO userDTO) {
         Set<String> result = new HashSet<>();
         StringBuilder queryBuilder = new StringBuilder();
         queryBuilder.append("select permission from ");
         if (userDTO.getRole().equals(UserRole.SELLER.name())) {
             queryBuilder.append("sellerPermission where sellerUser_Id = ?1");
-        }
-        if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
             queryBuilder.append("bidderPermission where bidderUser_Id = ?1");
+        } else {
+            return result;
         }
         Query query = entityManager.createNativeQuery(queryBuilder.toString());
         query.setParameter(1, userDTO.getId());

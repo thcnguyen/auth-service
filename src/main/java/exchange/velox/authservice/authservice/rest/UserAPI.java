@@ -72,7 +72,7 @@ public class UserAPI {
         }
         user.setLastLogin(System.currentTimeMillis());
         user.resetLoginAttempt();
-        user.setPermissons(userDAO.getPermissionListByUser(user));
+        user.setPermissions(userDAO.getPermissionListByUser(user));
         userDAO.updateUser(user);
         UserSession session = userService.generateNewUserSession(user);
         return utilsService.mapToUserSessionDTO(user, session);
@@ -80,11 +80,16 @@ public class UserAPI {
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
+        userService.logout(authorization);
         return (ResponseEntity<?>) ResponseEntity.ok();
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
-    public boolean checkValidToken(@RequestHeader("Token") String token) {
-        return userService.checkValidToken(token);
+    public ResponseEntity<?> checkValidToken(@RequestHeader("Authorization") String authorization) {
+        UserSessionDTO session = userService.checkValidToken(authorization);
+        if (session != null) {
+            return ResponseEntity.ok(userService.checkValidToken(authorization));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token invalid");
     }
 }

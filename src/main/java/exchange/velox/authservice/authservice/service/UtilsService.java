@@ -23,7 +23,7 @@ public class UtilsService {
         session.setEmail(user.getEmail());
         session.setToken(userSession.getToken());
         session.setRole(user.getRole());
-        session.setPermissions(user.getPermissons());
+        session.setPermissions(user.getPermissions());
         return session;
     }
 }

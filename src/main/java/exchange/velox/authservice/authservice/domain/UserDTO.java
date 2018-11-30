@@ -12,7 +12,7 @@ public class UserDTO {
     private String role;
     private Boolean active;
     private Long lastLogin;
-    private Set<String> permissons = new HashSet<>();
+    private Set<String> permissions = new HashSet<>();
     private int loginAttempt = 0;
 
     public int getLoginAttempt() {
@@ -87,17 +87,16 @@ public class UserDTO {
         return active;
     }
 
-    public Set<String> getPermissons() {
-        return permissons;
-    }
-
-    public void setPermissons(Set<String> permissons) {
-        this.permissons = permissons;
-    }
-
     public void resetLoginAttempt() {
         loginAttempt = 0;
     }
 
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
+    }
 }
 

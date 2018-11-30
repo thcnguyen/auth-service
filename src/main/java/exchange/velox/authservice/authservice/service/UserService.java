@@ -2,9 +2,7 @@ package exchange.velox.authservice.authservice.service;
 
 import exchange.velox.authservice.authservice.dao.UserDAO;
 import exchange.velox.authservice.authservice.dao.UserSessionDAO;
-import exchange.velox.authservice.authservice.domain.ClientType;
-import exchange.velox.authservice.authservice.domain.UserDTO;
-import exchange.velox.authservice.authservice.domain.UserSession;
+import exchange.velox.authservice.authservice.domain.*;
 import net.etalia.crepuscolo.auth.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,9 @@ public class UserService {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UtilsService utilsService;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int handleUserMaxLogin(String userId) {
@@ -55,20 +56,45 @@ public class UserService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public boolean checkValidToken(String token) {
+    public UserSessionDTO checkValidToken(String token) {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
-            if (checkTimeValidityCondition(session.getExpireDate())) {
+            UserDTO user = userDAO.load(session.getUid());
+            if (checkTimeValidityCondition(session.getExpireDate()) && checkUserActive(user)) {
+                user.setPermissions(userDAO.getPermissionListByUser(user));
                 session.setExpireDate(System.currentTimeMillis() + authService.getMaxTokenTime());
                 userSessionDAO.save(session);
-                return true;
+                return utilsService.mapToUserSessionDTO(user, session);
+
             }
         }
-        return false;
+        return null;
+    }
+
+    @Transactional
+    public void logout(String token) {
+        Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
+        if (sessionOpt.isPresent()) {
+            UserSession session = sessionOpt.get();
+            userSessionDAO.delete(session);
+        }
     }
 
     private boolean checkTimeValidityCondition(long timeStamp) {
         return System.currentTimeMillis() <= timeStamp;
+    }
+
+    private boolean checkUserActive(UserDTO user) {
+        if (user == null || !user.isActive()) {
+            return false;
+        }
+
+        if (UserRole.SELLER.name().equals(user.getRole()) || UserRole.BIDDER.name().equals(user.getRole())) {
+            if (!userDAO.getCompanyStatusByUser(user)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
