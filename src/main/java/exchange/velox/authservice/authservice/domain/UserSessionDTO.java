@@ -1,10 +1,13 @@
 package exchange.velox.authservice.authservice.domain;
 
+import java.util.Set;
+
 public class UserSessionDTO {
     private String id;
     private String email;
     private String role;
-    private boolean hasPermission;
+    private String token;
+    private Set<String> permissions;
 
     public String getId() {
         return id;
@@ -30,11 +33,19 @@ public class UserSessionDTO {
         this.role = role;
     }
 
-    public boolean isHasPermission() {
-        return hasPermission;
+    public String getToken() {
+        return token;
     }
 
-    public void setHasPermission(boolean hasPermission) {
-        this.hasPermission = hasPermission;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Set<String> getPermissions() {
+        return permissions;
+    }
+
+    public void setPermissions(Set<String> permissions) {
+        this.permissions = permissions;
     }
 }

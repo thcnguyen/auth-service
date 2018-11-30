@@ -19,10 +19,11 @@ public class UtilsService {
 
     public UserSessionDTO mapToUserSessionDTO(UserDTO user, UserSession userSession) {
         UserSessionDTO session = new UserSessionDTO();
-        session.setId(userSession.getToken());
+        session.setId(user.getId());
         session.setEmail(user.getEmail());
-        session.setHasPermission(true);
+        session.setToken(userSession.getToken());
         session.setRole(user.getRole());
+        session.setPermissions(user.getPermissons());
         return session;
     }
 }

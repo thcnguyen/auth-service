@@ -72,6 +72,7 @@ public class UserAPI {
         }
         user.setLastLogin(System.currentTimeMillis());
         user.resetLoginAttempt();
+        user.setPermissons(userDAO.getPermissionListByUser(user));
         userDAO.updateUser(user);
         UserSession session = userService.generateNewUserSession(user);
         return utilsService.mapToUserSessionDTO(user, session);

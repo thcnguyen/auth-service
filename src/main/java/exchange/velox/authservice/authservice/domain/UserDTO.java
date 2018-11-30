@@ -1,5 +1,8 @@
 package exchange.velox.authservice.authservice.domain;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class UserDTO {
     public static final int MAX_LOGIN_ATTEMPTS = 5;
 
@@ -9,6 +12,7 @@ public class UserDTO {
     private String role;
     private Boolean active;
     private Long lastLogin;
+    private Set<String> permissons = new HashSet<>();
     private int loginAttempt = 0;
 
     public int getLoginAttempt() {
@@ -81,6 +85,14 @@ public class UserDTO {
 
     public Boolean isActive() {
         return active;
+    }
+
+    public Set<String> getPermissons() {
+        return permissons;
+    }
+
+    public void setPermissons(Set<String> permissons) {
+        this.permissons = permissons;
     }
 
     public void resetLoginAttempt() {
