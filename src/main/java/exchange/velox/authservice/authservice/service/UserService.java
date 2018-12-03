@@ -1,5 +1,7 @@
 package exchange.velox.authservice.authservice.service;
 
+import exchange.velox.authservice.authservice.config.AuthConfig;
+import exchange.velox.authservice.authservice.dao.PasswordTokenDAO;
 import exchange.velox.authservice.authservice.dao.UserDAO;
 import exchange.velox.authservice.authservice.dao.UserSessionDAO;
 import exchange.velox.authservice.authservice.domain.*;
@@ -24,6 +26,9 @@ public class UserService {
     private UserSessionDAO userSessionDAO;
 
     @Autowired
+    private PasswordTokenDAO passwordTokenDAO;
+
+    @Autowired
     private AuthService authService;
 
     @Autowired
@@ -43,10 +48,10 @@ public class UserService {
     @Transactional
     public UserSession generateNewUserSession(UserDTO userDTO) {
         UserSession userSession = new UserSession();
-        userSession.setUid(userDTO.getId());
+        userSession.setUserId(userDTO.getId());
         // TODO : handle client type
         userSession.setClientType(ClientType.WEB);
-        userSession.setExpireDate(System.currentTimeMillis() + authService.getMaxTokenTime());
+        userSession.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_TOKEN_TIME);
         userSession.setToken(authService.generateRandomToken());
         return userSessionDAO.save(userSession);
     }
@@ -56,10 +61,10 @@ public class UserService {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
-            UserDTO user = userDAO.load(session.getUid());
-            if (checkTimeValidityCondition(session.getExpireDate()) && checkUserActive(user)) {
+            UserDTO user = userDAO.load(session.getUserId());
+            if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
                 user.setPermissions(userDAO.getPermissionListByUser(user));
-                session.setExpireDate(System.currentTimeMillis() + authService.getMaxTokenTime());
+                session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_TOKEN_TIME);
                 userSessionDAO.save(session);
                 return utilsService.mapToUserSessionDTO(user, session);
             } else {
@@ -72,6 +77,37 @@ public class UserService {
     }
 
     @Transactional
+    public UserDTO findUserByEmail(String email) {
+        return userDAO.findUserByEmail(email);
+    }
+
+    @Transactional
+    public UserSessionDTO updateUserAndGenerateSession(UserDTO user) {
+        user.setLastLogin(System.currentTimeMillis());
+        user.resetLoginAttempt();
+        user.setPermissions(userDAO.getPermissionListByUser(user));
+        userDAO.updateUser(user);
+        UserSession session = generateNewUserSession(user);
+        return utilsService.mapToUserSessionDTO(user, session);
+    }
+
+    public boolean isUserApproved(UserDTO user) {
+        String approvationStep = userDAO.getUserApprovationStep(user);
+        if (UserRole.BIDDER.name().equals(user.getRole()) || UserRole.SELLER.name().equals(user.getRole())
+                    || UserRole.INTRODUCER.name().equals(user.getRole())) {
+            if (ApprovationStep.APPROVED.name().equals(approvationStep)) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isUserInitiated(UserDTO user) {
+        return userDAO.isUserInitiated(user);
+    }
+
+    @Transactional
     public void logout(String token) {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
@@ -80,11 +116,22 @@ public class UserService {
         }
     }
 
+    @Transactional
+    public PasswordToken generateForgottenPasswordToken(String email, String userId) {
+        PasswordToken pwdToken = new PasswordToken();
+        pwdToken.setEmail(email);
+        pwdToken.setToken(authService.generateRandomToken());
+        pwdToken.setExpireDate(System.currentTimeMillis() + AuthConfig.FORGOT_PASSWORD_EXPIRY_IN_MILLISECONDS);
+        pwdToken.setTokenType(TokenType.FORGOT_PWD);
+        pwdToken.setUserId(userId);
+        return passwordTokenDAO.save(pwdToken);
+    }
+
     private boolean checkTimeValidityCondition(long timeStamp) {
         return System.currentTimeMillis() <= timeStamp;
     }
 
-    private boolean checkUserActive(UserDTO user) {
+    public boolean isUserCompanyActive(UserDTO user) {
         if (user == null || !user.isActive()) {
             return false;
         }
@@ -96,4 +143,6 @@ public class UserService {
         }
         return true;
     }
+
+
 }

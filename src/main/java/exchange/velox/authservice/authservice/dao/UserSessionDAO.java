@@ -9,9 +9,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserSessionDAO extends CrudRepository<UserSession, Long> {
-    Optional<UserSession> findUserSessionByUid(String uid);
+    Optional<UserSession> findUserSessionByUserId(String userId);
 
-    Optional<List<UserSession>> findUserSessionsByUid(String uid);
+    Optional<List<UserSession>> findUserSessionsByUserId(String userId);
 
     Optional<UserSession> findUserSessionByToken(String token);
 }

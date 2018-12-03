@@ -6,6 +6,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 server:
   port: 8081
@@ -16,3 +18,4 @@ auth:
   salt: VLXMGMAUTHDEV
   sign: Velox
   tokenTime: 3600000
+  forgot-password.expired-in-minutes: 60

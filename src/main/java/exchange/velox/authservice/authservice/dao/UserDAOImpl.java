@@ -3,6 +3,7 @@ package exchange.velox.authservice.authservice.dao;
 import exchange.velox.authservice.authservice.domain.UserDTO;
 import exchange.velox.authservice.authservice.domain.UserRole;
 import exchange.velox.authservice.authservice.service.UtilsService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +47,32 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public String getUserApprovationStep(UserDTO userDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+        String result = null;
+        if (userDTO.getRole().equals(UserRole.SELLER.name())) {
+            queryBuilder.append("select s.approvationStep from seller s " +
+                                            "inner join sellerUser su on s.id = su.seller_Id where su.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+            queryBuilder.append("select b.approvationStep from bidder b " +
+                                            "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
+            queryBuilder.append("select approvationStep from introducer where id  =?1");
+        }
+        else {
+            return result;
+        }
+        Query query = entityManager.createNativeQuery(queryBuilder.toString());
+        query.setParameter(1, userDTO.getId());
+        try {
+            result = (String) query.getSingleResult();
+        } catch (Exception e) {
+            // ignore
+        }
+        return result;
     }
 
     @Override
@@ -105,6 +132,28 @@ public class UserDAOImpl implements UserDAO {
         query.setParameter(1, userDTO.getId());
         try {
             result = (Set<String>) query.getResultStream().collect(Collectors.toSet());
+        } catch (Exception e) {
+            // ignore
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isUserInitiated(UserDTO userDTO) {
+        boolean result = false;
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("select initiated from ");
+        if (userDTO.getRole().equals(UserRole.SELLER.name())) {
+            queryBuilder.append("sellerUser where id = ?1");
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+            queryBuilder.append("bidderUser where id = ?1");
+        } else {
+            return true;
+        }
+        Query query = entityManager.createNativeQuery(queryBuilder.toString());
+        query.setParameter(1, userDTO.getId());
+        try {
+            result = (boolean) query.getSingleResult();
         } catch (Exception e) {
             // ignore
         }

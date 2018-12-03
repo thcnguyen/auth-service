@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "userSession")
-public class UserSession {
+@Table(name = "passwordToken")
+public class PasswordToken {
     private Long id;
     private String userId;
+    private String email;
     private String token;
-    private ClientType clientType;
     private Long expireDate;
+    private TokenType tokenType;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +23,24 @@ public class UserSession {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    @Column(nullable = false)
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    @Column(unique = true, nullable = false)
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Column(unique = true, nullable = false, length = 200)
@@ -42,23 +61,13 @@ public class UserSession {
         this.expireDate = expireDate;
     }
 
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    public ClientType getClientType() {
-        return clientType;
+    public TokenType getTokenType() {
+        return tokenType;
     }
 
-    public void setClientType(ClientType clientType) {
-        this.clientType = clientType;
-    }
-
-    @Column(nullable = false)
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
     }
 }
-

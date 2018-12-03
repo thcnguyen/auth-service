@@ -11,15 +11,6 @@ public class AuthServiceImpl implements AuthService {
 
     private SecureRandom secureRandom = new SecureRandom();
 
-    /**
-     * Max time (in millis) for normal tokens
-     */
-    private long maxTokenTime = 24l * 60l * 60000l;
-
-    public void setMaxTokenTime(long maxTokenTime) {
-        this.maxTokenTime = maxTokenTime;
-    }
-
     private String hidePasswordFormatV1(String fromWeb, byte[] saltBytes) {
         // Parse the fromWeb as a base64
         Base64Codec b64 = new Base64Codec();
@@ -74,13 +65,5 @@ public class AuthServiceImpl implements AuthService {
         byte[] result = new byte[100];
         sr.nextBytes(result);
         return org.apache.commons.codec.binary.Hex.encodeHexString(result);
-    }
-
-    protected boolean checkTimeValidityCondition(long timeStamp) {
-        return System.currentTimeMillis() <= timeStamp + this.maxTokenTime;
-    }
-
-    public long getMaxTokenTime() {
-        return maxTokenTime;
     }
 }

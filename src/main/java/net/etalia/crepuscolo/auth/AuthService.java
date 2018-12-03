@@ -45,6 +45,4 @@ public interface AuthService {
 
     String generateRandomToken();
 
-    long getMaxTokenTime();
-
 }
