@@ -4,7 +4,9 @@ import exchange.velox.authservice.authservice.dao.UserDAO;
 import exchange.velox.authservice.authservice.dao.UserSessionDAO;
 import exchange.velox.authservice.authservice.domain.*;
 import net.etalia.crepuscolo.auth.AuthService;
+import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,12 +51,6 @@ public class UserService {
         return userSessionDAO.save(userSession);
     }
 
-    private UserSession updateCurrentSession(UserSession session) {
-        session.setToken(authService.generateRandomToken());
-        session.setExpireDate(System.currentTimeMillis() + authService.getMaxTokenTime());
-        return userSessionDAO.save(session);
-    }
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserSessionDTO checkValidToken(String token) {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
@@ -66,7 +62,10 @@ public class UserService {
                 session.setExpireDate(System.currentTimeMillis() + authService.getMaxTokenTime());
                 userSessionDAO.save(session);
                 return utilsService.mapToUserSessionDTO(user, session);
-
+            } else {
+                userSessionDAO.delete(session);
+                throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
+                            .message("The access token expired");
             }
         }
         return null;

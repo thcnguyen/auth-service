@@ -26,9 +26,6 @@ public class UserAPI {
     private UserDAO userDAO;
 
     @Autowired
-    private UserSessionDAO userSessionDAO;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -81,7 +78,7 @@ public class UserAPI {
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
         userService.logout(authorization);
-        return (ResponseEntity<?>) ResponseEntity.ok();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
@@ -90,6 +87,6 @@ public class UserAPI {
         if (session != null) {
             return ResponseEntity.ok(userService.checkValidToken(authorization));
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Token invalid");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
     }
 }

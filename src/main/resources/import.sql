@@ -1,1 +1,0 @@
--- INSERT INTO user (id, email, role, token, password, uid) VALUES (1, 'congthanhspkt+ca1@gmail.com', 'SELLER', '1/lMT_gVG2UGQGiKX4e4O4AqUR0Es:lFOaQcPpm9gkSyQFz9vvOVyGKXE', '1/lMT_gVG2UGQGiKX4e4O4AqUR0Es:lFOaQcPpm9gkSyQFz9vvOVyGKXE', (SELECT UUID()));

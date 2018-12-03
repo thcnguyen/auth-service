@@ -5,8 +5,7 @@ spring:
     password: local
   jpa:
     hibernate:
-      ddl-auto: create
-      show_sql: true
+      ddl-auto: none
 
 server:
   port: 8081
