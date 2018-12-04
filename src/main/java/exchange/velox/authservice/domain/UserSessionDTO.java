@@ -1,4 +1,4 @@
-package exchange.velox.authservice.authservice.domain;
+package exchange.velox.authservice.domain;
 
 import java.util.Set;
 

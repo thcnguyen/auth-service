@@ -1,4 +1,4 @@
-package exchange.velox.authservice.authservice.domain;
+package exchange.velox.authservice.domain;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +13,6 @@ public class UserDTO {
     private Boolean active;
     private Long lastLogin;
     private Set<String> permissions = new HashSet<>();
-    private String approvalStep;
 
     private int loginAttempt = 0;
 
@@ -99,14 +98,6 @@ public class UserDTO {
 
     public void setPermissions(Set<String> permissions) {
         this.permissions = permissions;
-    }
-
-    public String getApprovalStep() {
-        return approvalStep;
-    }
-
-    public void setApprovalStep(String approvalStep) {
-        this.approvalStep = approvalStep;
     }
 }
 

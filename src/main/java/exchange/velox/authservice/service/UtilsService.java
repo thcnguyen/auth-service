@@ -1,8 +1,8 @@
-package exchange.velox.authservice.authservice.service;
+package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.authservice.domain.UserDTO;
-import exchange.velox.authservice.authservice.domain.UserSession;
-import exchange.velox.authservice.authservice.domain.UserSessionDTO;
+import exchange.velox.authservice.domain.UserDTO;
+import exchange.velox.authservice.domain.UserSession;
+import exchange.velox.authservice.domain.UserSessionDTO;
 
 public class UtilsService {
     public UserDTO mapToUserDTO(Object[] source) {

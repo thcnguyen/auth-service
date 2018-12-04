@@ -10,9 +10,8 @@
   create table passwordToken (
       id bigint(20) not null auto_increment,
       email varchar(255) not null unique,
-      expireDate bigint(20),
+      timestamp bigint(20),
       token varchar(200) unique,
       tokenType varchar(20) not null,
-      userId varchar(255) not null,
       primary key (id)
   ) ENGINE=InnoDB;

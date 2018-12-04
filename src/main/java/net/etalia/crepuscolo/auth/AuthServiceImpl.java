@@ -57,13 +57,4 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Version " + fromDb.charAt(0) + " of hidden password is unsupported");
         }
     }
-
-    @Override
-    public String generateRandomToken() {
-        SecureRandom sr = new SecureRandom();
-        sr.setSeed(sr.generateSeed(16));
-        byte[] result = new byte[100];
-        sr.nextBytes(result);
-        return org.apache.commons.codec.binary.Hex.encodeHexString(result);
-    }
 }

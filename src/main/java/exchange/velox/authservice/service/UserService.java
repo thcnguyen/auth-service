@@ -1,11 +1,11 @@
-package exchange.velox.authservice.authservice.service;
+package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.authservice.config.AuthConfig;
-import exchange.velox.authservice.authservice.dao.PasswordTokenDAO;
-import exchange.velox.authservice.authservice.dao.UserDAO;
-import exchange.velox.authservice.authservice.dao.UserSessionDAO;
+import exchange.velox.authservice.config.AuthConfig;
+import exchange.velox.authservice.dao.PasswordTokenDAO;
+import exchange.velox.authservice.dao.UserDAO;
+import exchange.velox.authservice.dao.UserSessionDAO;
 import exchange.velox.authservice.authservice.domain.*;
-import net.etalia.crepuscolo.auth.AuthService;
+import exchange.velox.authservice.domain.*;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +29,7 @@ public class UserService {
     private PasswordTokenDAO passwordTokenDAO;
 
     @Autowired
-    private AuthService authService;
+    private TokenService tokenService;
 
     @Autowired
     private UtilsService utilsService;
@@ -51,8 +51,8 @@ public class UserService {
         userSession.setUserId(userDTO.getId());
         // TODO : handle client type
         userSession.setClientType(ClientType.WEB);
-        userSession.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_TOKEN_TIME);
-        userSession.setToken(authService.generateRandomToken());
+        userSession.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
+        userSession.setToken(tokenService.generateRandomToken());
         return userSessionDAO.save(userSession);
     }
 
@@ -64,7 +64,7 @@ public class UserService {
             UserDTO user = userDAO.load(session.getUserId());
             if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
                 user.setPermissions(userDAO.getPermissionListByUser(user));
-                session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_TOKEN_TIME);
+                session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
                 userSessionDAO.save(session);
                 return utilsService.mapToUserSessionDTO(user, session);
             } else {
@@ -87,6 +87,13 @@ public class UserService {
         user.resetLoginAttempt();
         user.setPermissions(userDAO.getPermissionListByUser(user));
         userDAO.updateUser(user);
+        UserSession session = generateNewUserSession(user);
+        return utilsService.mapToUserSessionDTO(user, session);
+    }
+
+    @Transactional
+    public UserSessionDTO generateForgottenPassword(UserDTO user) {
+        user.setPermissions(userDAO.getPermissionListByUser(user));
         UserSession session = generateNewUserSession(user);
         return utilsService.mapToUserSessionDTO(user, session);
     }
@@ -120,10 +127,9 @@ public class UserService {
     public PasswordToken generateForgottenPasswordToken(String email, String userId) {
         PasswordToken pwdToken = new PasswordToken();
         pwdToken.setEmail(email);
-        pwdToken.setToken(authService.generateRandomToken());
-        pwdToken.setExpireDate(System.currentTimeMillis() + AuthConfig.FORGOT_PASSWORD_EXPIRY_IN_MILLISECONDS);
+        pwdToken.setToken(tokenService.generateRandomToken());
+        pwdToken.setTimestamp(System.currentTimeMillis());
         pwdToken.setTokenType(TokenType.FORGOT_PWD);
-        pwdToken.setUserId(userId);
         return passwordTokenDAO.save(pwdToken);
     }
 
@@ -144,5 +150,25 @@ public class UserService {
         return true;
     }
 
+    @Transactional
+    public String updateForgottenPassword(UserDTO user, boolean isInitiating) {
+        String companyName = null;
+        if (isInitiating) {
+            if (UserRole.SELLER.name().equals(user.getRole()) || UserRole.BIDDER.name().equals(user.getRole())) {
+                user.setActive(Boolean.TRUE);
+                userDAO.updateUser(user);
+                userDAO.updateInitiatedStatus(user, Boolean.TRUE);
+                companyName = userDAO.getUserCompanyName(user);
+            }
+        } else {
+            if (user.isActive()) {
+                userDAO.updateUser(user);
+            } else {
+                user.setActive(Boolean.TRUE);
+                userDAO.updateUser(user);
+            }
+        }
+        return companyName;
+    }
 
 }

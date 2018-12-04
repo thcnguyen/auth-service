@@ -1,13 +1,16 @@
-package exchange.velox.authservice.authservice.rest;
+package exchange.velox.authservice.rest;
 
-import exchange.velox.authservice.authservice.config.AuthConfig;
-import exchange.velox.authservice.authservice.domain.PasswordToken;
-import exchange.velox.authservice.authservice.domain.UserDTO;
-import exchange.velox.authservice.authservice.domain.UserRole;
-import exchange.velox.authservice.authservice.domain.UserSessionDTO;
-import exchange.velox.authservice.authservice.service.UserService;
+import exchange.velox.authservice.config.AuthConfig;
+import exchange.velox.authservice.domain.PasswordToken;
+import exchange.velox.authservice.domain.UserDTO;
+import exchange.velox.authservice.domain.UserRole;
+import exchange.velox.authservice.domain.UserSessionDTO;
+import exchange.velox.authservice.service.TokenService;
+import exchange.velox.authservice.service.UserService;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.utils.HandledHttpException;
+import net.etalia.crepuscolo.utils.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +29,10 @@ public class UserController implements UserAPI {
     private UserService userService;
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
+
+    @Autowired
+    private TokenService tokenService;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public UserSessionDTO login(@RequestHeader("Authorization") String authorization) {
@@ -97,12 +103,12 @@ public class UserController implements UserAPI {
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
-    public ResponseEntity<?> checkValidToken(@RequestHeader("Authorization") String authorization) {
+    public UserSessionDTO checkValidToken(@RequestHeader("Authorization") String authorization) {
         UserSessionDTO session = userService.checkValidToken(authorization);
         if (session != null) {
-            return ResponseEntity.ok(userService.checkValidToken(authorization));
+            return userService.checkValidToken(authorization);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+        throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.POST)
@@ -132,7 +138,36 @@ public class UserController implements UserAPI {
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.PUT)
-    public UserDTO updateForgottenPassword(@RequestBody Map<String, String> data) {
-        return null;
+    public UserSessionDTO updateForgottenPassword(@RequestBody Map<String, String> data) {
+        String password = data.get("password");
+        if (Strings.nullOrBlank(password)) {
+            log.info("Missing parameter 'password'");
+            throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST).message("Missing parameter 'password'");
+        }
+
+        String token = data.get("token");
+        String initiating = data.get("initiating");
+
+        boolean isInitiating = false;
+        UserDTO user;
+        if (StringUtils.equals(initiating, "SELLER")) {
+            user = tokenService.validateSellerRegistrationTokenAndGetUser(token);
+            isInitiating = true;
+        } else if (StringUtils.equals(initiating, "BIDDER")) {
+            user = tokenService.validateBidderRegistrationTokenAndGetUser(token);
+            isInitiating = true;
+        } else {
+            user = tokenService.validateForgottenPasswordTokenAndGetUser(token);
+        }
+        user.setPassword(authService.hidePassword(password));
+        String companyName = userService.updateForgottenPassword(user, isInitiating);
+        if (isInitiating) {
+            // TODO: handle sendInitiatedPasswordMail
+            // emailService.sendInitiatedPasswordMail(user, companyName);
+        } else {
+            // TODO: handle sendChangedPasswordMail
+            // emailService.sendChangedPasswordMail(user);
+        }
+        return userService.generateForgottenPassword(user);
     }
 }

@@ -43,6 +43,4 @@ public interface AuthService {
      */
     boolean verifyPassword(String fromDb, String fromWeb);
 
-    String generateRandomToken();
-
 }

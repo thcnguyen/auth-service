@@ -1,6 +1,6 @@
-package exchange.velox.authservice.authservice.dao;
+package exchange.velox.authservice.dao;
 
-import exchange.velox.authservice.authservice.domain.UserSession;
+import exchange.velox.authservice.domain.UserSession;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

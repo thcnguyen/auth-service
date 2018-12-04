@@ -1,8 +1,8 @@
-package exchange.velox.authservice.authservice.dao;
+package exchange.velox.authservice.dao;
 
-import exchange.velox.authservice.authservice.domain.UserDTO;
-import exchange.velox.authservice.authservice.domain.UserRole;
-import exchange.velox.authservice.authservice.service.UtilsService;
+import exchange.velox.authservice.domain.UserDTO;
+import exchange.velox.authservice.domain.UserRole;
+import exchange.velox.authservice.service.UtilsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -63,6 +63,31 @@ public class UserDAOImpl implements UserDAO {
             queryBuilder.append("select approvationStep from introducer where id  =?1");
         }
         else {
+            return result;
+        }
+        Query query = entityManager.createNativeQuery(queryBuilder.toString());
+        query.setParameter(1, userDTO.getId());
+        try {
+            result = (String) query.getSingleResult();
+        } catch (Exception e) {
+            // ignore
+        }
+        return result;
+    }
+
+    @Override
+    public String getUserCompanyName(UserDTO userDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+        String result = null;
+        if (userDTO.getRole().equals(UserRole.SELLER.name())) {
+            queryBuilder.append("select s.companyName from seller s " +
+                                            "inner join sellerUser su on s.id = su.seller_Id where su.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+            queryBuilder.append("select b.companyName from bidder b " +
+                                            "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
+            queryBuilder.append("select companyName from introducer where id  =?1");
+        } else {
             return result;
         }
         Query query = entityManager.createNativeQuery(queryBuilder.toString());
@@ -158,5 +183,26 @@ public class UserDAOImpl implements UserDAO {
             // ignore
         }
         return result;
+    }
+
+    @Override
+    public void updateInitiatedStatus(UserDTO userDTO, boolean initiated) {
+        StringBuilder queryBuilder = new StringBuilder();
+        if (UserRole.SELLER.name().equals(userDTO.getRole())) {
+            queryBuilder.append("update sellerUser set initiated = ?1 where id =?2");
+        } else if (UserRole.BIDDER.name().equals(userDTO.getRole())) {
+            queryBuilder.append("update bidderUser set initiated = ?1 where id =?2");
+        }
+        String sql = queryBuilder.toString();
+        if (StringUtils.isNotEmpty(sql)) {
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter(1, initiated);
+            query.setParameter(2, userDTO.getId());
+            try {
+                query.executeUpdate();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
     }
 }
