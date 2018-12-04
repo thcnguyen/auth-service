@@ -4,7 +4,6 @@ import exchange.velox.authservice.config.AuthConfig;
 import exchange.velox.authservice.dao.PasswordTokenDAO;
 import exchange.velox.authservice.dao.UserDAO;
 import exchange.velox.authservice.dao.UserSessionDAO;
-import exchange.velox.authservice.authservice.domain.*;
 import exchange.velox.authservice.domain.*;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.springframework.beans.factory.annotation.Autowired;
