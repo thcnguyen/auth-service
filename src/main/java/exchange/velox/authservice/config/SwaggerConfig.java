@@ -27,7 +27,7 @@ public class SwaggerConfig {
     private ApiInfo apiInfo() {
         return new ApiInfo(
                     "Auth REST API",
-                    "Authentication and authorization API",
+                    "Micro service for authentication and authorization",
                     null,
                     null,
                     new Contact("Velotrade Management Limited ", "www.velotrade.com", "contacts@velotrade.com "),

@@ -66,11 +66,6 @@
 			<version>0.7.4</version>
 		</dependency>
 		<dependency>
-			<groupId>net.etalia</groupId>
-			<artifactId>jalia</artifactId>
-			<version>0.4.0</version>
-		</dependency>
-		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>2.9.2</version>
@@ -196,17 +191,6 @@
 		<repository>
 			<id>spring-milestones</id>
 			<url>http://repo.spring.io/milestone</url>
-		</repository>
-		<repository>
-			<id>repo.danysoft.org-snapshots</id>
-			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>repo.danysoft.org-release</id>
-			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com/release</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>

@@ -2,7 +2,6 @@ package exchange.velox.authservice.mvc;
 
 import net.etalia.crepuscolo.utils.ChainMap;
 import net.etalia.crepuscolo.utils.HttpException;
-import net.etalia.jalia.spring.JaliaJsonView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.Ordered;
@@ -71,7 +70,7 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
                 errmap.putAll(htex.getProperties());
             }
 
-            return new ModelAndView(new JaliaJsonView(), errmap);
+            return new ModelAndView(new JsonView(), errmap);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
