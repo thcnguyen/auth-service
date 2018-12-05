@@ -1,14 +1,18 @@
 package exchange.velox.authservice.config;
 
+import exchange.velox.authservice.mvc.JsonHttpExceptionHandler;
+import exchange.velox.authservice.mvc.RequestLoggerFilter;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UtilsService;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.auth.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
@@ -47,5 +51,19 @@ public class Config extends WebMvcConfigurerAdapter {
     @Bean
     public UtilsService utilsService() {
         return new UtilsService();
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestLoggerFilter> requestLoggerFilter() {
+        FilterRegistrationBean<RequestLoggerFilter> frb = new FilterRegistrationBean<>();;
+        frb.setFilter(new RequestLoggerFilter());
+        frb.addUrlPatterns("/*");
+        frb.setName("RequestLoggerFilter");
+        return frb;
+    }
+
+    @Bean
+    public HandlerExceptionResolver jsonHttpExceptionHandler() {
+        return new JsonHttpExceptionHandler();
     }
 }
