@@ -29,6 +29,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
@@ -81,7 +86,16 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>exchange.velox.authservice.AuthServiceApplication</mainClass>
+					<executable>true</executable>
+					<fork>true</fork>
+				</configuration>
 			</plugin>
+<!--			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>-->
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
@@ -169,17 +183,6 @@
 			<id>spring-milestones</id>
 			<url>http://repo.spring.io/milestone</url>
 		</repository>
-		<repository>
-			<id>repo.danysoft.org-snapshots</id>
-			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>repo.danysoft.org-release</id>
-			<url>http://repo.danysoft.org.s3-website-eu-west-1.amazonaws.com/release</url>
-		</repository>
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
@@ -191,11 +194,5 @@
 			<url>http://repo.spring.io/milestone</url>
 		</pluginRepository>
 	</pluginRepositories>
-	<distributionManagement>
-		<site>
-			<id>repo.velox.exchange</id>
-			<url>s3://repo.velox.exchange/sites/platform-backend</url>
-		</site>
-	</distributionManagement>
 
 </project>
