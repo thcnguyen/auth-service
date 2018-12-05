@@ -10,7 +10,6 @@ import exchange.velox.authservice.service.UserService;
 import io.swagger.annotations.*;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.utils.HandledHttpException;
-import net.etalia.crepuscolo.utils.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -178,7 +177,7 @@ public class UserController implements UserAPI {
     public UserSessionDTO updateForgottenPassword(
                 @ApiParam(value = "Data model need to be update forgot password", required = true) @RequestBody Map<String, String> data) {
         String password = data.get("password");
-        if (Strings.nullOrBlank(password)) {
+        if (StringUtils.isNotEmpty(password)) {
             log.info("Missing parameter 'password'");
             throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST).message("Missing parameter 'password'");
         }
