@@ -91,7 +91,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserSessionDTO generateForgottenPassword(UserDTO user) {
+    public UserSessionDTO generateForgottenPasswordSession(UserDTO user) {
         user.setPermissions(userDAO.getPermissionListByUser(user));
         UserSession session = generateNewUserSession(user);
         return utilsService.mapToUserSessionDTO(user, session);
@@ -124,11 +124,18 @@ public class UserService {
 
     @Transactional
     public PasswordToken generateForgottenPasswordToken(String email, String userId) {
-        PasswordToken pwdToken = new PasswordToken();
-        pwdToken.setEmail(email);
-        pwdToken.setToken(tokenService.generateRandomToken());
-        pwdToken.setTimestamp(System.currentTimeMillis());
-        pwdToken.setTokenType(TokenType.FORGOT_PWD);
+        PasswordToken pwdToken = passwordTokenDAO.findPasswordTokenByEmail(email);
+        if (pwdToken != null) {
+            pwdToken.setToken(tokenService.generateRandomToken());
+            pwdToken.setTimestamp(System.currentTimeMillis());
+            pwdToken.setTokenType(TokenType.FORGOT_PWD);
+        } else {
+            pwdToken = new PasswordToken();
+            pwdToken.setEmail(email);
+            pwdToken.setToken(tokenService.generateRandomToken());
+            pwdToken.setTimestamp(System.currentTimeMillis());
+            pwdToken.setTokenType(TokenType.FORGOT_PWD);
+        }
         return passwordTokenDAO.save(pwdToken);
     }
 

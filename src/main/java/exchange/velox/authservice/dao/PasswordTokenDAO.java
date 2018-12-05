@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PasswordTokenDAO extends CrudRepository<PasswordToken, Long> {
     PasswordToken findPasswordTokenByToken(String token);
+    PasswordToken findPasswordTokenByEmail(String email);
 }

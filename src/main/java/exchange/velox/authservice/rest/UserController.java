@@ -7,6 +7,7 @@ import exchange.velox.authservice.domain.UserRole;
 import exchange.velox.authservice.domain.UserSessionDTO;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UserService;
+import io.swagger.annotations.*;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import net.etalia.crepuscolo.utils.Strings;
@@ -35,6 +36,15 @@ public class UserController implements UserAPI {
     private TokenService tokenService;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
+    @ApiOperation(value = "Login")
+    @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "Successfully login"),
+                @ApiResponse(code = 401, message = "You are not authorized to login"),
+                @ApiResponse(code = 404, message = "User is not found")
+    })
+    @ApiImplicitParams({
+                @ApiImplicitParam(name = "Authorization", paramType = "header")
+    })
     public UserSessionDTO login(@RequestHeader("Authorization") String authorization) {
         if (!authorization.split("_", 2)[0].equals(AuthConfig.AUTHENTICATION_SIGN)) {
             throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("AUTH_ERROR")
@@ -97,23 +107,44 @@ public class UserController implements UserAPI {
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @ApiOperation(value = "Logout")
+    @ApiResponses(value = {
+                @ApiResponse(code = 204, message = "Logout login")
+    })
+    @ApiImplicitParams({
+                @ApiImplicitParam(name = "Authorization", paramType = "header")
+    })
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
         userService.logout(authorization);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @RequestMapping(value = "/token", method = RequestMethod.GET)
+    @ApiOperation(value = "Check valid token")
+    @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "The access token is valid"),
+                @ApiResponse(code = 401, message = "The access token expired")
+    })
+    @ApiImplicitParams({
+                @ApiImplicitParam(name = "Authorization", paramType = "header")
+    })
     public UserSessionDTO checkValidToken(@RequestHeader("Authorization") String authorization) {
         UserSessionDTO session = userService.checkValidToken(authorization);
         if (session != null) {
-            return userService.checkValidToken(authorization);
+            return session;
         }
         throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.POST)
+    @ApiOperation(value = "Forgot password")
+    @ApiResponses(value = {
+                @ApiResponse(code = 204, message = "The email forgot password has been send to user"),
+                @ApiResponse(code = 500, message = "User is not found"),
+    })
     public @ResponseStatus(HttpStatus.NO_CONTENT)
-    void forgotPassword(@RequestBody Map<String, String> data) {
+    void forgotPassword(
+                @ApiParam(value = "Data model need to be forgot password", required = true) @RequestBody Map<String, String> data) {
         if (!data.containsKey("email")) {
             throw new HandledHttpException().statusCode(500).message("Body request does not contain 'email'");
         }
@@ -138,7 +169,14 @@ public class UserController implements UserAPI {
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.PUT)
-    public UserSessionDTO updateForgottenPassword(@RequestBody Map<String, String> data) {
+    @ApiOperation(value = "Update forgotten password")
+    @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "Successfully update forgotten password"),
+                @ApiResponse(code = 401, message = "You are not authorized"),
+                @ApiResponse(code = 400, message = "Missing parameter 'password'")
+    })
+    public UserSessionDTO updateForgottenPassword(
+                @ApiParam(value = "Data model need to be update forgot password", required = true) @RequestBody Map<String, String> data) {
         String password = data.get("password");
         if (Strings.nullOrBlank(password)) {
             log.info("Missing parameter 'password'");
@@ -168,6 +206,6 @@ public class UserController implements UserAPI {
             // TODO: handle sendChangedPasswordMail
             // emailService.sendChangedPasswordMail(user);
         }
-        return userService.generateForgottenPassword(user);
+        return userService.generateForgottenPasswordSession(user);
     }
 }
