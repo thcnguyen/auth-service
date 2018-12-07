@@ -23,7 +23,7 @@ token:
 spring:
   profiles: local
   datasource:
-    url: jdbc:mysql://localhost/local2
+    url: jdbc:mysql://localhost/local
     username: local
     password: local
 

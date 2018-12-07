@@ -1,5 +1,6 @@
 package exchange.velox.authservice.domain;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class UserSessionDTO {
@@ -7,7 +8,7 @@ public class UserSessionDTO {
     private String email;
     private String role;
     private String token;
-    private Set<String> permissions;
+    private Set<String> permissions = new HashSet<>();
 
     public String getId() {
         return id;

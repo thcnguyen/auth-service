@@ -119,6 +119,8 @@ public class UserService {
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             userSessionDAO.delete(session);
+        } else {
+            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND);
         }
     }
 

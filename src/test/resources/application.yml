@@ -1,0 +1,28 @@
+spring:
+  profiles: test
+  datasource:
+    driver: org.hsqldb.jdbcDriver
+    url: jdbc:hsqldb:mem:testdb
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+      dialect: org.hibernate.dialect.HSQLDialect
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+server:
+  port: 8999
+  servlet:
+    context-path: /auth
+auth:
+  salt: VLXMGMAUTHDEV
+  sign: Velox
+  sessionTime: 3600000
+token:
+  forgot-password:
+    expired-in-minutes: 30
+  seller-user-registration:
+    expired-in-minutes: 4320
+  bidder-user-registration:
+    expired-in-minutes: 4320
