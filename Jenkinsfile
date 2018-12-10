@@ -8,7 +8,6 @@ pipeline {
         k8s_replicas = 1
         k8s_container_port = 9000
         k8s_service_port = 9000
-        k8s_service_node_port = 31000
     }
     options {
       buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '10')
@@ -49,6 +48,7 @@ pipeline {
                 k8s_server_username = "ubuntu"
                 k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
                 k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
+                k8s_service_node_port = 10000
             }
             steps {
                 sh """
