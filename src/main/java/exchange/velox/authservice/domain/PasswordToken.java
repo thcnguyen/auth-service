@@ -1,6 +1,7 @@
 package exchange.velox.authservice.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import exchange.velox.authservice.dto.TokenType;
 
 import javax.persistence.*;
 

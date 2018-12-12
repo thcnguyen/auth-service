@@ -19,6 +19,8 @@ token:
     expired-in-minutes: 4320
   bidder-user-registration:
     expired-in-minutes: 4320
+mail:
+  from: Velotrade [noreply address] <noreply@velotrade.com>
 ---
 spring:
   profiles: local
@@ -26,6 +28,8 @@ spring:
     url: jdbc:mysql://localhost/local
     username: local
     password: local
+server:
+  web: http://localhost:4200/
 
 ---
 spring:
@@ -34,6 +38,8 @@ spring:
     url: jdbc:mysql://development.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/development
     username: development
     password: BaR#!09Nes$$!Ca
+server:
+  web: http://frontend-dev.velotrade.tech/
 
 ---
 spring:
@@ -42,6 +48,8 @@ spring:
     url: jdbc:mysql://e2etest.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/e2etest
     username: e2etest
     password: bCYmTXwb34yVzjZT
+server:
+  web: http://frontend-e2etest.velotrade.tech/
 
 ---
 spring:
@@ -50,6 +58,8 @@ spring:
     url: jdbc:mysql://staging.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/staging
     username: staging
     password: Tr1s%TarI$!!80
+server:
+  web: https://staging.velotrade.com/
 
 ---
 spring:
@@ -58,3 +68,5 @@ spring:
     url: jdbc:mysql://production.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/production
     username: velox
     password: velox_db_2016
+server:
+  web: https://platform.velotrade.com/

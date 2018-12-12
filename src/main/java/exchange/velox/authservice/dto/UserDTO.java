@@ -1,4 +1,4 @@
-package exchange.velox.authservice.domain;
+package exchange.velox.authservice.dto;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,7 +12,10 @@ public class UserDTO {
     private String role;
     private Boolean active;
     private Long lastLogin;
+    private String lang;
     private Set<String> permissions = new HashSet<>();
+    private String firstname;
+    private String lastname;
 
     private int loginAttempt = 0;
 
@@ -98,6 +101,34 @@ public class UserDTO {
 
     public void setPermissions(Set<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
+
+    public String getFirstname() {
+        return firstname;
+    }
+
+    public void setFirstname(String firstname) {
+        this.firstname = firstname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
+
+    public void setLastname(String lastname) {
+        this.lastname = lastname;
+    }
+
+    public String getFullName() {
+        return getFirstname() + " " + getLastname();
     }
 }
 

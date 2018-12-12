@@ -1,8 +1,8 @@
 package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.domain.UserDTO;
+import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.domain.UserSession;
-import exchange.velox.authservice.domain.UserSessionDTO;
+import exchange.velox.authservice.dto.UserSessionDTO;
 
 public class UtilsService {
     public UserDTO mapToUserDTO(Object[] source) {
@@ -14,6 +14,7 @@ public class UtilsService {
         userDTO.setActive(Boolean.valueOf((String.valueOf(source[4]))));
         userDTO.setLastLogin(Long.valueOf(String.valueOf(source[5])));
         userDTO.setLoginAttempt(Integer.valueOf(String.valueOf(source[6])));
+        userDTO.setLang(String.valueOf(source[7]));
         return userDTO;
     }
 

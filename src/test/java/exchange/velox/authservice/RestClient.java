@@ -1,6 +1,6 @@
 package exchange.velox.authservice;
 
-import exchange.velox.authservice.domain.UserSessionDTO;
+import exchange.velox.authservice.dto.UserSessionDTO;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

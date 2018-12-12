@@ -1,7 +1,7 @@
 package exchange.velox.authservice.dao;
 
-import exchange.velox.authservice.domain.UserDTO;
-import exchange.velox.authservice.domain.UserRole;
+import exchange.velox.authservice.dto.UserDTO;
+import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.service.UtilsService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public UserDTO load(String id) {
         Query query = entityManager.createNativeQuery(
-                    "select id, email, password, role, active, lastLogin, loginAttempt from user where id = ?1");
+                    "select id, email, password, role, active, lastLogin, loginAttempt, lang from user where id = ?1");
         query.setParameter(1, id);
         try {
             Object[] result = (Object[]) query.getSingleResult();
@@ -39,7 +39,7 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public UserDTO findUserByEmail(String email) {
         Query query = entityManager.createNativeQuery(
-                    "select id, email, password, role, active, lastLogin, loginAttempt from user where email = ?1");
+                    "select id, email, password, role, active, lastLogin, loginAttempt, lang from user where email = ?1");
         query.setParameter(1, email);
         try {
             Object[] result = (Object[]) query.getSingleResult();
@@ -47,6 +47,32 @@ public class UserDAOImpl implements UserDAO {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public UserDTO enrichUserInfo(UserDTO userDTO) {
+        StringBuilder queryBuilder = new StringBuilder();
+        if (userDTO.getRole().equals(UserRole.SELLER.name())) {
+            queryBuilder.append("select su.firstname,su.lastname from seller s " +
+                                            "inner join sellerUser su on s.id = su.seller_Id where su.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
+            queryBuilder.append("select bu.firstname,bu.lastname from bidder b " +
+                                            "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
+        } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
+            queryBuilder.append("select firstname,lastname from introducer where id  =?1");
+        }
+        Query query = entityManager.createNativeQuery(queryBuilder.toString());
+        query.setParameter(1, userDTO.getId());
+        try {
+            Object[] result = (Object[]) query.getSingleResult();
+            if (result != null && result.length > 0) {
+                userDTO.setFirstname(String.valueOf(result[0]));
+                userDTO.setLastname(String.valueOf(result[1]));
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return userDTO;
     }
 
     @Override

@@ -1,7 +1,12 @@
 package exchange.velox.authservice.config;
 
+import exchange.velox.authservice.gateway.DocgenServiceGateway;
+import exchange.velox.authservice.gateway.EmailServiceGateway;
+import exchange.velox.authservice.gateway.impl.DocgenServiceGatewayImpl;
+import exchange.velox.authservice.gateway.impl.EmailServiceGatewayImpl;
 import exchange.velox.authservice.mvc.JsonHttpExceptionHandler;
 import exchange.velox.authservice.mvc.RequestLoggerFilter;
+import exchange.velox.authservice.service.EmailService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UtilsService;
 import net.etalia.crepuscolo.auth.AuthService;
@@ -10,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -37,9 +45,10 @@ public class Config extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public TokenService tokenService(@Value("${token.forgot-password.expired-in-minutes:60}") long forgotPasswordInMinutes,
-                                     @Value("${token.seller-user-registration.expired-in-minutes:4320}" /* 3 days */) long sellerUserRegistrationInMinutes,
-                                     @Value("${token.bidder-user-registration.expired-in-minutes:4320}" /* 3 days */) long bidderUserRegistrationInMinutes) {
+    public TokenService tokenService(
+                @Value("${token.forgot-password.expired-in-minutes:60}") long forgotPasswordInMinutes,
+                @Value("${token.seller-user-registration.expired-in-minutes:4320}" /* 3 days */) long sellerUserRegistrationInMinutes,
+                @Value("${token.bidder-user-registration.expired-in-minutes:4320}" /* 3 days */) long bidderUserRegistrationInMinutes) {
 
         TokenService tokenService = new TokenService();
         tokenService.setForgotPasswordExpiryInMilliseconds(forgotPasswordInMinutes * 60_000);
@@ -55,15 +64,47 @@ public class Config extends WebMvcConfigurerAdapter {
 
     @Bean
     public FilterRegistrationBean<RequestLoggerFilter> requestLoggerFilter() {
-        FilterRegistrationBean<RequestLoggerFilter> frb = new FilterRegistrationBean<>();;
+        FilterRegistrationBean<RequestLoggerFilter> frb = new FilterRegistrationBean<>();
         frb.setFilter(new RequestLoggerFilter());
         frb.addUrlPatterns("/*");
         frb.setName("RequestLoggerFilter");
         return frb;
     }
 
+    @Bean(name = "veloRest")
+    public RestTemplate veloRest() {
+        return new RestTemplate();
+    }
+
     @Bean
     public HandlerExceptionResolver jsonHttpExceptionHandler() {
         return new JsonHttpExceptionHandler();
+    }
+
+    @Bean
+    public DocgenServiceGateway docgenServiceGateway() {
+        return new DocgenServiceGatewayImpl();
+    }
+
+    @Bean
+    public EmailServiceGateway emailServiceGateway() {
+        return new EmailServiceGatewayImpl();
+    }
+
+    @Bean
+    public MessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setBasenames("i18n/locale");
+        return messageSource;
+    }
+
+    @Bean
+    public EmailService emailService(@Value("${mail.from}") String from,
+                                     @Value("${server.web}") String serverWeb) {
+        EmailService emailService = new EmailService();
+        emailService.setFrom(from);
+        emailService.setServerWeb(serverWeb);
+        return emailService;
     }
 }

@@ -4,7 +4,9 @@ import exchange.velox.authservice.config.AuthConfig;
 import exchange.velox.authservice.dao.PasswordTokenDAO;
 import exchange.velox.authservice.dao.UserDAO;
 import exchange.velox.authservice.dao.UserSessionDAO;
-import exchange.velox.authservice.domain.*;
+import exchange.velox.authservice.domain.PasswordToken;
+import exchange.velox.authservice.domain.UserSession;
+import exchange.velox.authservice.dto.*;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -77,7 +79,8 @@ public class UserService {
 
     @Transactional
     public UserDTO findUserByEmail(String email) {
-        return userDAO.findUserByEmail(email);
+        UserDTO user = userDAO.findUserByEmail(email);
+        return userDAO.enrichUserInfo(user);
     }
 
     @Transactional
@@ -88,6 +91,12 @@ public class UserService {
         userDAO.updateUser(user);
         UserSession session = generateNewUserSession(user);
         return utilsService.mapToUserSessionDTO(user, session);
+    }
+
+    @Transactional
+    public UserDTO updateUser(UserDTO user) {
+        userDAO.updateUser(user);
+        return userDAO.findUserByEmail(user.getEmail());
     }
 
     @Transactional
@@ -125,18 +134,32 @@ public class UserService {
     }
 
     @Transactional
-    public PasswordToken generateForgottenPasswordToken(String email, String userId) {
+    public PasswordToken generateForgottenPasswordToken(String email) {
+        return generatePasswordToken(email, TokenType.FORGOT_PWD);
+    }
+
+    @Transactional
+    public PasswordToken generateInviteSellerUserPasswordToken(String email) {
+        return generatePasswordToken(email, TokenType.SELLER_USER_INVITE);
+    }
+
+    @Transactional
+    public PasswordToken generateInviteBidderUserPasswordToken(String email) {
+        return generatePasswordToken(email, TokenType.BIDDER_USER_INVITE);
+    }
+
+    private PasswordToken generatePasswordToken(String email, TokenType type) {
         PasswordToken pwdToken = passwordTokenDAO.findPasswordTokenByEmail(email);
         if (pwdToken != null) {
             pwdToken.setToken(tokenService.generateRandomToken());
             pwdToken.setTimestamp(System.currentTimeMillis());
-            pwdToken.setTokenType(TokenType.FORGOT_PWD);
+            pwdToken.setTokenType(type);
         } else {
             pwdToken = new PasswordToken();
             pwdToken.setEmail(email);
             pwdToken.setToken(tokenService.generateRandomToken());
             pwdToken.setTimestamp(System.currentTimeMillis());
-            pwdToken.setTokenType(TokenType.FORGOT_PWD);
+            pwdToken.setTokenType(type);
         }
         return passwordTokenDAO.save(pwdToken);
     }

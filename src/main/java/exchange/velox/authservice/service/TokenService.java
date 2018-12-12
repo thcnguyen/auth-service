@@ -3,8 +3,8 @@ package exchange.velox.authservice.service;
 import exchange.velox.authservice.dao.PasswordTokenDAO;
 import exchange.velox.authservice.dao.UserDAO;
 import exchange.velox.authservice.domain.PasswordToken;
-import exchange.velox.authservice.domain.TokenType;
-import exchange.velox.authservice.domain.UserDTO;
+import exchange.velox.authservice.dto.TokenType;
+import exchange.velox.authservice.dto.UserDTO;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +53,7 @@ public class TokenService {
             expiredToken();
         }
         UserDTO user = userDAO.findUserByEmail(pwdToken.getEmail());
+        userDAO.enrichUserInfo(user);
         if (user == null) {
             userNotFound();
         }

@@ -2,9 +2,11 @@ package exchange.velox.authservice.rest;
 
 import exchange.velox.authservice.config.AuthConfig;
 import exchange.velox.authservice.domain.PasswordToken;
-import exchange.velox.authservice.domain.UserDTO;
-import exchange.velox.authservice.domain.UserRole;
-import exchange.velox.authservice.domain.UserSessionDTO;
+import exchange.velox.authservice.dto.Permission;
+import exchange.velox.authservice.dto.UserDTO;
+import exchange.velox.authservice.dto.UserRole;
+import exchange.velox.authservice.dto.UserSessionDTO;
+import exchange.velox.authservice.service.EmailService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UserService;
 import io.swagger.annotations.*;
@@ -33,6 +35,9 @@ public class UserController implements UserAPI {
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private EmailService emailService;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ApiOperation(value = "Login")
@@ -64,6 +69,7 @@ public class UserController implements UserAPI {
         if (!authService.verifyPassword(user.getPassword(), passMd5)) {
             int remainingLoginAttempts = userService.handleUserMaxLogin(user.getId());
             if (remainingLoginAttempts < 0) {
+                emailService.sendMaxLoginAttemptReached(user);
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
                             .message("User disabled");
             } else {
@@ -128,6 +134,9 @@ public class UserController implements UserAPI {
                 @ApiImplicitParam(name = "Authorization", paramType = "header")
     })
     public UserSessionDTO checkValidToken(@RequestHeader("Authorization") String authorization) {
+        if(StringUtils.isEmpty(authorization)) {
+            throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+        }
         UserSessionDTO session = userService.checkValidToken(authorization);
         if (session != null) {
             return session;
@@ -162,8 +171,53 @@ public class UserController implements UserAPI {
             throw new HandledHttpException().statusCode(500)
                         .message("This user has not been initiated, please continue the registration process");
         }
-        PasswordToken pwdToken = userService.generateForgottenPasswordToken(email, user.getId());
-        // TODO: Send email forgot password
+        PasswordToken pwdToken = userService.generateForgottenPasswordToken(email);
+        emailService.sendForgotPasswordMail(user, pwdToken.getToken());
+    }
+
+    @Override
+    @RequestMapping(value = "/token/inviteUser", method = RequestMethod.POST)
+    @ApiOperation(value = "Invite seller user and bidder user")
+    @ApiResponses(value = {
+                @ApiResponse(code = 204, message = "Successfully invite user"),
+                @ApiResponse(code = 401, message = "You are not authorized")
+    })
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void inviteUser(String authorization, Map<String, String> data) {
+        UserSessionDTO session = checkValidToken(authorization);
+        UserDTO currentUser = userService.findUserByEmail(session.getEmail());
+        String userType = data.get("userType");
+        String email = data.get("email");
+        String language = data.get("language");
+        String firstname = data.get("firstname");
+        String lastname = data.get("lastname");
+        String role = data.get("role");
+        String companyName = data.get("companyName");
+        PasswordToken token = null;
+        if (StringUtils.isAnyBlank(userType, email, language, firstname, lastname, role, companyName)) {
+            throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST);
+        }
+        // prepare email dto
+        UserDTO invitedUser = new UserDTO();
+        invitedUser.setEmail(email);
+        invitedUser.setLang(language);
+        invitedUser.setFirstname(firstname);
+        invitedUser.setLastname(lastname);
+        invitedUser.setRole(role);
+
+        if (!session.getPermissions().contains(Permission.INVITE_USER.name())) {
+            throw new HandledHttpException().statusCode(HttpStatus.NOT_ACCEPTABLE).errorCode("OP_DENIED").message("Not enough permission");
+        }
+        if (UserRole.SELLER.equals(userType)) {
+            token = userService.generateInviteSellerUserPasswordToken(email);
+        }
+        if (UserRole.BIDDER.equals(userType)) {
+            token = userService.generateInviteBidderUserPasswordToken(email);
+        }
+        if (token == null) {
+            throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST);
+        }
+        emailService.sendMemberRegistrationMail(invitedUser, token.getToken(), companyName, currentUser.getFullName());
 
     }
 
@@ -177,7 +231,7 @@ public class UserController implements UserAPI {
     public UserSessionDTO updateForgottenPassword(
                 @ApiParam(value = "Data model need to be update forgot password", required = true) @RequestBody Map<String, String> data) {
         String password = data.get("password");
-        if (StringUtils.isNotEmpty(password)) {
+        if (StringUtils.isEmpty(password)) {
             log.info("Missing parameter 'password'");
             throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST).message("Missing parameter 'password'");
         }
@@ -199,11 +253,9 @@ public class UserController implements UserAPI {
         user.setPassword(authService.hidePassword(password));
         String companyName = userService.updateForgottenPassword(user, isInitiating);
         if (isInitiating) {
-            // TODO: handle sendInitiatedPasswordMail
-            // emailService.sendInitiatedPasswordMail(user, companyName);
+            emailService.sendInitiatedPasswordMail(user, companyName);
         } else {
-            // TODO: handle sendChangedPasswordMail
-            // emailService.sendChangedPasswordMail(user);
+            emailService.sendChangedPasswordMail(user);
         }
         return userService.generateForgottenPasswordSession(user);
     }
