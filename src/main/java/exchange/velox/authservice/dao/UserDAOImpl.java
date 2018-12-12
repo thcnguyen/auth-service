@@ -61,6 +61,9 @@ public class UserDAOImpl implements UserDAO {
         } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
             queryBuilder.append("select firstname,lastname from introducer where id  =?1");
         }
+        if(StringUtils.isEmpty(queryBuilder)) {
+            return userDTO;
+        }
         Query query = entityManager.createNativeQuery(queryBuilder.toString());
         query.setParameter(1, userDTO.getId());
         try {

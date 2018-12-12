@@ -13,6 +13,7 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 server:
   port: 8800
+  web:
   servlet:
     context-path: /auth
 auth:
@@ -26,3 +27,5 @@ token:
     expired-in-minutes: 4320
   bidder-user-registration:
     expired-in-minutes: 4320
+mail:
+  from: Velotrade [noreply address] <noreply@velotrade.com>
