@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
@@ -106,5 +107,13 @@ public class Config extends WebMvcConfigurerAdapter {
         emailService.setFrom(from);
         emailService.setServerWeb(serverWeb);
         return emailService;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("origin", "accept", "authorization", "content-type", "x-token", "x-2fa-token")
+                .exposedHeaders("x-authorization");
     }
 }
