@@ -44,11 +44,14 @@ public class SwaggerConfig {
     }
 
     private String getAppVersion() {
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties")) {
-            String gitString = IOUtils.toString(inputStream, "UTF-8");
-            Map<String, Object> gitInfo = JsonUtils.readToMap(gitString);
-            return String.valueOf(gitInfo.get("git.build.version"));
-        } catch (IOException e) {
+        try {
+            try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties")) {
+                String gitString = IOUtils.toString(inputStream, "UTF-8");
+                Map<String, Object> gitInfo = JsonUtils.readToMap(gitString);
+                return String.valueOf(gitInfo.get("git.build.version")) + "-" + String
+                            .valueOf(gitInfo.get("git.commit.id.abbrev"));
+            }
+        } catch (Exception e ) {
             log.warn("Failed to read git.properties from classpath", e);
             return "Version information could not be retrieved";
         }
