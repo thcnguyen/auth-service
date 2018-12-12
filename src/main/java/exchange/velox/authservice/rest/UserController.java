@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-public class UserController implements UserAPI {
+public class UserController {
 
     private Logger log = LogManager.getLogger(UserController.class);
 
@@ -134,7 +134,7 @@ public class UserController implements UserAPI {
                 @ApiImplicitParam(name = "Authorization", paramType = "header")
     })
     public UserSessionDTO checkValidToken(@RequestHeader("Authorization") String authorization) {
-        if(StringUtils.isEmpty(authorization)) {
+        if (StringUtils.isEmpty(authorization)) {
             throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
         }
         UserSessionDTO session = userService.checkValidToken(authorization);
@@ -175,7 +175,6 @@ public class UserController implements UserAPI {
         emailService.sendForgotPasswordMail(user, pwdToken.getToken());
     }
 
-    @Override
     @RequestMapping(value = "/token/inviteUser", method = RequestMethod.POST)
     @ApiOperation(value = "Invite seller user and bidder user")
     @ApiResponses(value = {
@@ -183,35 +182,39 @@ public class UserController implements UserAPI {
                 @ApiResponse(code = 401, message = "You are not authorized")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void inviteUser(String authorization, Map<String, String> data) {
+    @ApiImplicitParams({
+                @ApiImplicitParam(name = "Authorization", paramType = "header")
+    })
+    public void inviteUser(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> data) {
         UserSessionDTO session = checkValidToken(authorization);
         UserDTO currentUser = userService.findUserByEmail(session.getEmail());
         String userType = data.get("userType");
         String email = data.get("email");
-        String language = data.get("language");
+        String lang = data.get("lang");
         String firstname = data.get("firstname");
         String lastname = data.get("lastname");
         String role = data.get("role");
         String companyName = data.get("companyName");
         PasswordToken token = null;
-        if (StringUtils.isAnyBlank(userType, email, language, firstname, lastname, role, companyName)) {
+        if (StringUtils.isAnyBlank(userType, email, lang, firstname, lastname, role, companyName)) {
             throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST);
         }
         // prepare email dto
         UserDTO invitedUser = new UserDTO();
         invitedUser.setEmail(email);
-        invitedUser.setLang(language);
+        invitedUser.setLang(lang);
         invitedUser.setFirstname(firstname);
         invitedUser.setLastname(lastname);
         invitedUser.setRole(role);
 
         if (!session.getPermissions().contains(Permission.INVITE_USER.name())) {
-            throw new HandledHttpException().statusCode(HttpStatus.NOT_ACCEPTABLE).errorCode("OP_DENIED").message("Not enough permission");
+            throw new HandledHttpException().statusCode(HttpStatus.NOT_ACCEPTABLE).errorCode("OP_DENIED")
+                        .message("Not enough permission");
         }
-        if (UserRole.SELLER.equals(userType)) {
+        if (UserRole.SELLER.name().equals(userType)) {
             token = userService.generateInviteSellerUserPasswordToken(email);
         }
-        if (UserRole.BIDDER.equals(userType)) {
+        if (UserRole.BIDDER.name().equals(userType)) {
             token = userService.generateInviteBidderUserPasswordToken(email);
         }
         if (token == null) {

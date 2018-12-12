@@ -154,6 +154,7 @@ public class EmailService {
         model.put("token", token);
         model.put("inviter", inviter);
         model.put("companyName", companyName);
+        model.put("role", user.getRole());
         log.info("Sending invitation mail to " + user.getEmail());
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);

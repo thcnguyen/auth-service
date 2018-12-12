@@ -132,11 +132,12 @@ public class UserDAOImpl implements UserDAO {
     @Override
     public boolean updateUser(UserDTO userDTO) {
         Query query = entityManager.createNativeQuery(
-                    "update user set active = ?1, lastLogin = ?2, loginAttempt = ?3 where id = ?4");
+                    "update user set active = ?1, lastLogin = ?2, loginAttempt = ?3, password = ?4 where id = ?5");
         query.setParameter(1, userDTO.getActive());
         query.setParameter(2, userDTO.getLastLogin());
         query.setParameter(3, userDTO.getLoginAttempt());
-        query.setParameter(4, userDTO.getId());
+        query.setParameter(4, userDTO.getPassword());
+        query.setParameter(5, userDTO.getId());
         try {
             query.executeUpdate();
             return true;

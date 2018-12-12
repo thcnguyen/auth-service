@@ -12,7 +12,11 @@ public class UtilsService {
         userDTO.setPassword(String.valueOf(source[2]));
         userDTO.setRole(String.valueOf(source[3]));
         userDTO.setActive(Boolean.valueOf((String.valueOf(source[4]))));
-        userDTO.setLastLogin(Long.valueOf(String.valueOf(source[5])));
+        if (source[5] != null) {
+            userDTO.setLastLogin(Long.valueOf(String.valueOf(source[5])));
+        } else {
+            userDTO.setLastLogin(null);
+        }
         userDTO.setLoginAttempt(Integer.valueOf(String.valueOf(source[6])));
         userDTO.setLang(String.valueOf(source[7]));
         return userDTO;
