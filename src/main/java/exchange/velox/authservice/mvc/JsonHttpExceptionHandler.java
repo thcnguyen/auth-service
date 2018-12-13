@@ -52,7 +52,7 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
             if (!StringUtils.hasLength(reason)) {
                 response.setStatus(statusCode);
             } else {
-                response.sendError(statusCode, errorCode);
+                response.setStatus(statusCode, errorCode);
             }
 
             if (!StringUtils.hasLength(errorCode))
