@@ -80,7 +80,10 @@ public class UserService {
     @Transactional
     public UserDTO findUserByEmail(String email) {
         UserDTO user = userDAO.findUserByEmail(email);
-        return userDAO.enrichUserInfo(user);
+        if (user != null) {
+            user = userDAO.enrichUserInfo(user);
+        }
+        return user;
     }
 
     @Transactional
