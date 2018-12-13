@@ -2,8 +2,10 @@ package exchange.velox.authservice.config;
 
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
 import exchange.velox.authservice.gateway.EmailServiceGateway;
+import exchange.velox.authservice.gateway.LogServiceGateway;
 import exchange.velox.authservice.gateway.impl.DocgenServiceGatewayImpl;
 import exchange.velox.authservice.gateway.impl.EmailServiceGatewayImpl;
+import exchange.velox.authservice.gateway.impl.LogServiceGatewayImpl;
 import exchange.velox.authservice.mvc.JsonHttpExceptionHandler;
 import exchange.velox.authservice.mvc.RequestLoggerFilter;
 import exchange.velox.authservice.service.EmailService;
@@ -115,5 +117,10 @@ public class Config implements WebMvcConfigurer {
                     .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                     .allowedHeaders("origin", "accept", "authorization", "content-type", "x-token", "x-2fa-token")
                     .exposedHeaders("x-authorization");
+    }
+
+    @Bean
+    public LogServiceGateway logServiceGateway() {
+        return new LogServiceGatewayImpl();
     }
 }

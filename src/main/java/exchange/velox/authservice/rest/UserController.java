@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -175,6 +176,44 @@ public class UserController {
         emailService.sendForgotPasswordMail(user, pwdToken.getToken());
     }
 
+    @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.GET)
+    @ApiOperation(value = "Validate forgotten password token")
+    @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "The access token is valid"),
+                @ApiResponse(code = 401, message = "The access token expired")
+    })
+    Map<String, String> validateForgottenPasswordToken(@ApiParam(value = "Token", required = true)
+                                                       @RequestParam(value = "token") String token) {
+        Map<String, String> result = new HashMap<>();
+        tokenService.validateBidderRegistrationTokenAndGetUser(token);
+        result.put("result", "OK");
+        return result;
+    }
+
+    @RequestMapping(value = "/token/initiate", method = RequestMethod.GET)
+    @ApiOperation(value = "Validate validate initiate token")
+    @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "The access token is valid"),
+                @ApiResponse(code = 401, message = "The access token expired")
+    })
+    Map<String, String> validateInitiateToken(
+                @ApiParam(value = "Token", required = true) @RequestParam(value = "token") String token,
+                @ApiParam(value = "Role", required = true) @RequestParam(value = "role") String role) {
+        Map<String, String> result = new HashMap<>();
+        UserDTO user;
+        result.put("result", "OK");
+        if (UserRole.SELLER.name().equalsIgnoreCase(role)) {
+            user = tokenService.validateSellerRegistrationTokenAndGetUser(token);
+        } else if (UserRole.BIDDER.name().equalsIgnoreCase(role)) {
+            user = tokenService.validateBidderRegistrationTokenAndGetUser(token);
+        } else {
+            return result;
+        }
+        result.put("companyName", userService.getUserCompanyName(user));
+
+        return result;
+    }
+
     @RequestMapping(value = "/token/inviteUser", method = RequestMethod.POST)
     @ApiOperation(value = "Invite seller user and bidder user")
     @ApiResponses(value = {
@@ -185,7 +224,8 @@ public class UserController {
     @ApiImplicitParams({
                 @ApiImplicitParam(name = "Authorization", paramType = "header")
     })
-    public void inviteUser(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> data) {
+    public void inviteUser(@RequestHeader("Authorization") String authorization,
+                           @RequestBody Map<String, String> data) {
         UserSessionDTO session = checkValidToken(authorization);
         UserDTO currentUser = userService.findUserByEmail(session.getEmail());
         String userType = data.get("userType");
@@ -220,7 +260,7 @@ public class UserController {
         if (token == null) {
             throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST);
         }
-        emailService.sendMemberRegistrationMail(invitedUser, token.getToken(), companyName, currentUser.getFullName());
+        emailService.sendMemberRegistrationMail(invitedUser, token.getToken(), companyName, currentUser);
 
     }
 

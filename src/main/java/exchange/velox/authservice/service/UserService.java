@@ -202,4 +202,8 @@ public class UserService {
         return companyName;
     }
 
+    public String getUserCompanyName(UserDTO user) {
+        return userDAO.getUserCompanyName(user);
+    }
+
 }

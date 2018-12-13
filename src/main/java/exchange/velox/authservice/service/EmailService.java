@@ -1,11 +1,11 @@
 package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.EmailOptionDTO;
 import exchange.velox.authservice.dto.EmailRequestDTO;
-import exchange.velox.authservice.dto.ReferenceDTO;
+import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
 import exchange.velox.authservice.gateway.EmailServiceGateway;
+import exchange.velox.authservice.util.JsonUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +20,9 @@ public class EmailService {
     private String from;
 
     private String serverWeb;
+
+    @Autowired
+    private LogService logService;
 
     @Autowired
     private ResourceBundleMessageSource resource;
@@ -58,7 +61,7 @@ public class EmailService {
         emailOption.setBody(body);
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        emailRequest.setRefObject(new ReferenceDTO());
+        logService.addLog(null, JsonUtils.getLogView(emailOption));
         emailServiceGateway.sendMail(emailRequest);
     }
 
@@ -83,7 +86,7 @@ public class EmailService {
         emailOption.setBody(body);
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        emailRequest.setRefObject(new ReferenceDTO());
+        logService.addLog(null, JsonUtils.getLogView(emailOption));
         emailServiceGateway.sendMail(emailRequest);
     }
 
@@ -108,7 +111,7 @@ public class EmailService {
         emailOption.setBody(body);
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        emailRequest.setRefObject(new ReferenceDTO());
+        logService.addLog(null, JsonUtils.getLogView(emailOption));
         emailServiceGateway.sendMail(emailRequest);
     }
 
@@ -132,11 +135,12 @@ public class EmailService {
         emailOption.setBody(body);
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        emailRequest.setRefObject(new ReferenceDTO());
+        logService.addLog(null, JsonUtils.getLogView(emailOption));
         emailServiceGateway.sendMail(emailRequest);
     }
 
-    public void sendMemberRegistrationMail(final UserDTO user, final String token, final String companyName, final String inviter) {
+    public void sendMemberRegistrationMail(final UserDTO user, final String token, final String companyName,
+                                           final UserDTO inviter) {
         String subject = resource.getMessage("mail.memberRegistration.subject", null, new Locale(user.getLang()));
         // prepare email model
         EmailRequestDTO emailRequest = new EmailRequestDTO();
@@ -152,7 +156,7 @@ public class EmailService {
         model.put("name", user.getFullName());
         model.put("email", user.getEmail());
         model.put("token", token);
-        model.put("inviter", inviter);
+        model.put("inviter", inviter.getFullName());
         model.put("companyName", companyName);
         model.put("role", user.getRole());
         log.info("Sending invitation mail to " + user.getEmail());
@@ -160,7 +164,7 @@ public class EmailService {
         emailOption.setBody(body);
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        emailRequest.setRefObject(new ReferenceDTO());
+        logService.addLog(inviter, JsonUtils.getLogView(emailOption));
         emailServiceGateway.sendMail(emailRequest);
     }
 

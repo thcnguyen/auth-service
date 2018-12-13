@@ -10,7 +10,6 @@ public class EmailRequestDTO implements Serializable {
 
     private List<EmailOptionDTO> emailContent;
     private UserDTO author;
-    private ReferenceDTO refObject;
 
     public enum TemplateType {
         userLocked,
@@ -36,20 +35,11 @@ public class EmailRequestDTO implements Serializable {
         this.author = author;
     }
 
-    public ReferenceDTO getRefObject() {
-        return refObject;
-    }
-
-    public void setRefObject(ReferenceDTO refObject) {
-        this.refObject = refObject;
-    }
-
     @Override
     public String toString() {
         return "EmailRequestDTO{" +
                     "emailContent=" + emailContent +
                     ", author=" + author +
-                    ", refObject=" + refObject +
                     '}';
     }
 }

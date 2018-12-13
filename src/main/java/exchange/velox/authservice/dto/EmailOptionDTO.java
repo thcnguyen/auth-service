@@ -1,5 +1,8 @@
 package exchange.velox.authservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import exchange.velox.authservice.util.view.Views;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -8,6 +11,7 @@ import java.util.Set;
 
 public class EmailOptionDTO implements Serializable {
     private String from;
+    @JsonView(Views.LogView.class)
     private Set<String> to = new HashSet<>();
     private Set<String> bcc = new HashSet<>();
     private String subject;
@@ -16,6 +20,7 @@ public class EmailOptionDTO implements Serializable {
     private byte[] file;
     private String attachmentName;
     private String contentType;
+    @JsonView(Views.LogView.class)
     private String errorMessage;
 
     public String getFrom() {
