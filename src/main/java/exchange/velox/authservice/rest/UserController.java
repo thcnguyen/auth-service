@@ -185,7 +185,7 @@ public class UserController {
     Map<String, String> validateForgottenPasswordToken(@ApiParam(value = "Token", required = true)
                                                        @RequestParam(value = "token") String token) {
         Map<String, String> result = new HashMap<>();
-        tokenService.validateBidderRegistrationTokenAndGetUser(token);
+        tokenService.validateForgottenPasswordTokenAndGetUser(token);
         result.put("result", "OK");
         return result;
     }
