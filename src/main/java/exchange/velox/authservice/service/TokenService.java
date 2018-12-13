@@ -53,7 +53,9 @@ public class TokenService {
             expiredToken();
         }
         UserDTO user = userDAO.findUserByEmail(pwdToken.getEmail());
-        userDAO.enrichUserInfo(user);
+        if (user != null) {
+            user = userDAO.enrichUserInfo(user);
+        }
         if (user == null) {
             userNotFound();
         }
