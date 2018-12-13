@@ -22,10 +22,10 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class Config extends WebMvcConfigurerAdapter {
+public class Config implements WebMvcConfigurer {
 
     protected ApplicationContext appctx;
 
@@ -112,8 +112,8 @@ public class Config extends WebMvcConfigurerAdapter {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                .allowedHeaders("origin", "accept", "authorization", "content-type", "x-token", "x-2fa-token")
-                .exposedHeaders("x-authorization");
+                    .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                    .allowedHeaders("origin", "accept", "authorization", "content-type", "x-token", "x-2fa-token")
+                    .exposedHeaders("x-authorization");
     }
 }

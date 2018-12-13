@@ -26,7 +26,7 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
     public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object handler,
                                          Exception ex) {
         ResponseStatus responseStatus = AnnotationUtils.findAnnotation(ex.getClass(), ResponseStatus.class);
-        HttpException htex = null;
+        HttpException htex;
         if (!(ex instanceof HttpException)) {
             htex = new HttpException().cause(ex);
             log.error("Found an Error", ex);
@@ -52,7 +52,7 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
             if (!StringUtils.hasLength(reason)) {
                 response.setStatus(statusCode);
             } else {
-                response.setStatus(statusCode, errorCode);
+                response.sendError(statusCode, errorCode);
             }
 
             if (!StringUtils.hasLength(errorCode))
