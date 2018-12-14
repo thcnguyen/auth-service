@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -88,12 +90,16 @@ public class UserService {
 
     @Transactional
     public UserSessionDTO updateUserAndGenerateSession(UserDTO user) {
+        Map<String, Object> extraData = new HashMap<>();
         user.setLastLogin(System.currentTimeMillis());
         user.resetLoginAttempt();
         user.setPermissions(userDAO.getPermissionListByUser(user));
         userDAO.updateUser(user);
         UserSession session = generateNewUserSession(user);
-        return utilsService.mapToUserSessionDTO(user, session);
+        extraData.put("auth", session.getToken());
+        UserSessionDTO sessionDTO = utilsService.mapToUserSessionDTO(user, session);
+        sessionDTO.setExtraData(extraData);
+        return sessionDTO;
     }
 
     @Transactional

@@ -1,6 +1,8 @@
 package exchange.velox.authservice.dto;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class UserSessionDTO {
@@ -9,6 +11,7 @@ public class UserSessionDTO {
     private String role;
     private String token;
     private Set<String> permissions = new HashSet<>();
+    private Map<String, Object> extraData = new HashMap<>();
 
     public String getId() {
         return id;
@@ -48,5 +51,13 @@ public class UserSessionDTO {
 
     public void setPermissions(Set<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public Map<String, Object> getExtraData() {
+        return extraData;
+    }
+
+    public void setExtraData(Map<String, Object> extraData) {
+        this.extraData = extraData;
     }
 }
