@@ -6,6 +6,7 @@ import exchange.velox.authservice.dto.Permission;
 import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.dto.UserSessionDTO;
+import exchange.velox.authservice.mvc.TokenExpiredException;
 import exchange.velox.authservice.service.EmailService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UserService;
@@ -122,7 +123,7 @@ public class UserController {
                 @ApiImplicitParam(name = "Authorization", paramType = "header")
     })
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authorization) {
-        userService.logout(authorization);
+        userService.logout(authorization, false);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -136,14 +137,15 @@ public class UserController {
                 @ApiImplicitParam(name = "Authorization", paramType = "header")
     })
     public UserSessionDTO checkValidToken(@RequestHeader("Authorization") String authorization) {
-        if (StringUtils.isEmpty(authorization)) {
-            throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+        UserSessionDTO sessionDTO;
+        try {
+            sessionDTO = userService.checkValidToken(authorization);
+        } catch (TokenExpiredException e) {
+            userService.logout(authorization, true);
+            throw e;
         }
-        UserSessionDTO session = userService.checkValidToken(authorization);
-        if (session != null) {
-            return session;
-        }
-        throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+        userService.extendToken(authorization);
+        return sessionDTO;
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.POST)

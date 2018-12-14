@@ -7,8 +7,11 @@ import exchange.velox.authservice.dao.UserSessionDAO;
 import exchange.velox.authservice.domain.PasswordToken;
 import exchange.velox.authservice.domain.UserSession;
 import exchange.velox.authservice.dto.*;
+import exchange.velox.authservice.mvc.TokenExpiredException;
 import net.etalia.crepuscolo.utils.HandledHttpException;
-import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ import java.util.Optional;
 @Service
 public class UserService {
 
+    protected Log log = LogFactory.getLog(UserService.class);
 
     @Autowired
     private UserDAO userDAO;
@@ -60,32 +64,35 @@ public class UserService {
         return userSessionDAO.save(userSession);
     }
 
+
+    @Transactional(readOnly = true)
     public UserSessionDTO checkValidToken(String token) {
+
+        if (StringUtils.isEmpty(token)) {
+            throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+        }
+
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             UserDTO user = userDAO.load(session.getUserId());
             if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
                 user.setPermissions(userDAO.getPermissionListByUser(user));
-                session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
-                updateSessionWithNewTransaction(session, false);
-                return utilsService.mapToUserSessionDTO(user, session);
+                return utilsService.mapToUserSessionDTO(user, session); // GOOD
             } else {
-                updateSessionWithNewTransaction(session, true);
-                throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
-                            .message("The access token expired");
+                throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
+                            .message("The access token expired"); // BAD
             }
         }
-        return null;
+        throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateSessionWithNewTransaction(UserSession session, boolean delete) {
-        if (BooleanUtils.isTrue(delete)) {
-            userSessionDAO.delete(session);
-        } else {
-            userSessionDAO.save(session);
-        }
+    @Transactional
+    public void extendToken(String token) {
+        Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
+        UserSession session = sessionOpt.get();
+        session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
+        userSessionDAO.save(session);
     }
 
     @Transactional
@@ -141,13 +148,21 @@ public class UserService {
     }
 
     @Transactional
-    public void logout(String token) {
-        Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
-        if (sessionOpt.isPresent()) {
-            UserSession session = sessionOpt.get();
-            userSessionDAO.delete(session);
-        } else {
-            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND);
+    public void logout(String token, boolean silent) {
+        try {
+            Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
+            if (sessionOpt.isPresent()) {
+                UserSession session = sessionOpt.get();
+                userSessionDAO.delete(session);
+            } else {
+                throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND);
+            }
+        } catch (RuntimeException e) {
+            if (silent) {
+                log.warn(e.getMessage(), e);
+            } else {
+                throw e;
+            }
         }
     }
 
