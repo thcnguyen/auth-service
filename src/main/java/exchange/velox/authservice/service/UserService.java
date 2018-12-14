@@ -197,9 +197,6 @@ public class UserService {
         } else {
             if (user.isActive()) {
                 userDAO.updateUser(user);
-            } else {
-                user.setActive(Boolean.TRUE);
-                userDAO.updateUser(user);
             }
         }
         return companyName;

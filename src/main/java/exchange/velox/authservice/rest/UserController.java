@@ -12,6 +12,7 @@ import exchange.velox.authservice.service.UserService;
 import io.swagger.annotations.*;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.utils.HandledHttpException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -172,6 +173,11 @@ public class UserController {
             throw new HandledHttpException().statusCode(500)
                         .message("This user has not been initiated, please continue the registration process");
         }
+        if (BooleanUtils.isFalse(user.isActive())) {
+            log.info("We do not allow to forgot password for BANNED user: {}", email);
+            throw new HandledHttpException().statusCode(500)
+                        .message("This user has been banned, please contact administrator for more information");
+        }
         PasswordToken pwdToken = userService.generateForgottenPasswordToken(email);
         emailService.sendForgotPasswordMail(user, pwdToken.getToken());
     }
@@ -292,6 +298,11 @@ public class UserController {
             isInitiating = true;
         } else {
             user = tokenService.validateForgottenPasswordTokenAndGetUser(token);
+        }
+        if (BooleanUtils.isFalse(user.isActive())) {
+            log.info("We do not allow to update forgotten password for BANNED user: {}", user.getEmail());
+            throw new HandledHttpException().statusCode(500)
+                        .message("This user has been banned, please contact administrator for more information");
         }
         user.setPassword(authService.hidePassword(password));
         String companyName = userService.updateForgottenPassword(user, isInitiating);
