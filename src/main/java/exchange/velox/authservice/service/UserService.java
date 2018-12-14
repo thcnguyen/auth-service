@@ -8,6 +8,7 @@ import exchange.velox.authservice.domain.PasswordToken;
 import exchange.velox.authservice.domain.UserSession;
 import exchange.velox.authservice.dto.*;
 import net.etalia.crepuscolo.utils.HandledHttpException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -59,7 +60,6 @@ public class UserService {
         return userSessionDAO.save(userSession);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UserSessionDTO checkValidToken(String token) {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
@@ -68,15 +68,24 @@ public class UserService {
             if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
                 user.setPermissions(userDAO.getPermissionListByUser(user));
                 session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
-                userSessionDAO.save(session);
+                updateSessionWithNewTransaction(session, false);
                 return utilsService.mapToUserSessionDTO(user, session);
             } else {
-                userSessionDAO.delete(session);
+                updateSessionWithNewTransaction(session, true);
                 throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
                             .message("The access token expired");
             }
         }
         return null;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateSessionWithNewTransaction(UserSession session, boolean delete) {
+        if (BooleanUtils.isTrue(delete)) {
+            userSessionDAO.delete(session);
+        } else {
+            userSessionDAO.save(session);
+        }
     }
 
     @Transactional
