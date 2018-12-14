@@ -113,7 +113,7 @@ public class UserController {
         return userService.updateUserAndGenerateSession(user);
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
     @ApiOperation(value = "Logout")
     @ApiResponses(value = {
                 @ApiResponse(code = 204, message = "Logout login")
