@@ -42,7 +42,7 @@ public class RestClient {
         final HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", authorization);
         final HttpEntity<String> entity = new HttpEntity<>(headers);
-        restTemplate.exchange(getLocalUrl() + LOGOUT_URL, HttpMethod.POST, entity, UserSessionDTO.class).getBody();
+        restTemplate.exchange(getLocalUrl() + LOGOUT_URL, HttpMethod.DELETE, entity, UserSessionDTO.class).getBody();
     }
 
     private String getLocalUrl() {
