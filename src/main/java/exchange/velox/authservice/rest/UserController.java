@@ -114,10 +114,10 @@ public class UserController {
         return userService.updateUserAndGenerateSession(user);
     }
 
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @RequestMapping(value = "/logout", method = RequestMethod.DELETE)
     @ApiOperation(value = "Logout")
     @ApiResponses(value = {
-                @ApiResponse(code = 204, message = "Logout login")
+                @ApiResponse(code = 204, message = "Logout successfully")
     })
     @ApiImplicitParams({
                 @ApiImplicitParam(name = "Authorization", paramType = "header")

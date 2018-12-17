@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.scheduling.annotation.Async;
 
 import java.util.*;
 
@@ -41,6 +42,7 @@ public class EmailService {
         return model;
     }
 
+    @Async
     public void sendMaxLoginAttemptReached(final UserDTO user) {
         String subject = resource.getMessage("mail.userLocked.subject", null, new Locale(user.getLang()));
         // prepare email model
@@ -65,6 +67,7 @@ public class EmailService {
         emailServiceGateway.sendMail(emailRequest);
     }
 
+    @Async
     public void sendForgotPasswordMail(final UserDTO user, final String token) {
         String subject = resource.getMessage("mail.forgotPassword.subject", null, new Locale(user.getLang()));
         // prepare email model
@@ -90,6 +93,7 @@ public class EmailService {
         emailServiceGateway.sendMail(emailRequest);
     }
 
+    @Async
     public void sendInitiatedPasswordMail(final UserDTO user, String companyName) {
         String subject = resource.getMessage("mail.initiatedPassword.subject", null, new Locale(user.getLang()));
         // prepare email model
@@ -115,6 +119,7 @@ public class EmailService {
         emailServiceGateway.sendMail(emailRequest);
     }
 
+    @Async
     public void sendChangedPasswordMail(final UserDTO user) {
         String subject = resource.getMessage("mail.changedPassword.subject", null, new Locale(user.getLang()));
         // prepare email model
@@ -139,6 +144,7 @@ public class EmailService {
         emailServiceGateway.sendMail(emailRequest);
     }
 
+    @Async
     public void sendMemberRegistrationMail(final UserDTO user, final String token, final String companyName,
                                            final UserDTO inviter) {
         String subject = resource.getMessage("mail.memberRegistration.subject", null, new Locale(user.getLang()));

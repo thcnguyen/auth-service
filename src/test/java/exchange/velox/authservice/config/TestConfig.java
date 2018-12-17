@@ -41,14 +41,6 @@ public class TestConfig extends Config {
         return authService;
     }
 
-    private String getPort() {
-        String port = System.getProperty("server.port");
-        if (StringUtils.isBlank(port)) {
-            return "8080";
-        }
-        return port;
-    }
-
     @Override
     @Bean
     public TokenService tokenService(@Value("${token.forgot-password.expired-in-minutes:60}") long forgotPasswordInMinutes,
