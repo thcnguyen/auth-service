@@ -14,13 +14,13 @@ public class EmailOptionDTO implements Serializable {
     @JsonView(Views.LogView.class)
     private Set<String> to = new HashSet<>();
     private Set<String> bcc = new HashSet<>();
+    @JsonView(Views.LogView.class)
     private String subject;
     private String template;
     private String body;
     private byte[] file;
     private String attachmentName;
     private String contentType;
-    @JsonView(Views.LogView.class)
     private String errorMessage;
 
     public String getFrom() {
