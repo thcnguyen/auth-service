@@ -1,14 +1,14 @@
 package exchange.velox.authservice.config;
 
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
-import exchange.velox.authservice.gateway.EmailServiceGateway;
+import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.gateway.LogServiceGateway;
 import exchange.velox.authservice.gateway.impl.DocgenServiceGatewayImpl;
-import exchange.velox.authservice.gateway.impl.EmailServiceGatewayImpl;
+import exchange.velox.authservice.gateway.impl.NotificationServiceGatewayImpl;
 import exchange.velox.authservice.gateway.impl.LogServiceGatewayImpl;
 import exchange.velox.authservice.mvc.JsonHttpExceptionHandler;
 import exchange.velox.authservice.mvc.RequestLoggerFilter;
-import exchange.velox.authservice.service.EmailService;
+import exchange.velox.authservice.service.NotificationService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UtilsService;
 import net.etalia.crepuscolo.auth.AuthService;
@@ -92,8 +92,8 @@ public class Config implements WebMvcConfigurer {
     }
 
     @Bean
-    public EmailServiceGateway emailServiceGateway() {
-        return new EmailServiceGatewayImpl();
+    public NotificationServiceGateway notificationServiceGateway() {
+        return new NotificationServiceGatewayImpl();
     }
 
     @Bean
@@ -105,12 +105,12 @@ public class Config implements WebMvcConfigurer {
     }
 
     @Bean
-    public EmailService emailService(@Value("${mail.from}") String from,
-                                     @Value("${server.web}") String serverWeb) {
-        EmailService emailService = new EmailService();
-        emailService.setFrom(from);
-        emailService.setServerWeb(serverWeb);
-        return emailService;
+    public NotificationService notificationService(@Value("${mail.from}") String from,
+                                            @Value("${server.web}") String serverWeb) {
+        NotificationService notificationService = new NotificationService();
+        notificationService.setFrom(from);
+        notificationService.setServerWeb(serverWeb);
+        return notificationService;
     }
 
     @Override

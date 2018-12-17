@@ -3,8 +3,9 @@ package exchange.velox.authservice.service;
 import exchange.velox.authservice.dto.EmailOptionDTO;
 import exchange.velox.authservice.dto.EmailRequestDTO;
 import exchange.velox.authservice.dto.UserDTO;
+import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
-import exchange.velox.authservice.gateway.EmailServiceGateway;
+import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.util.JsonUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,9 +15,9 @@ import org.springframework.scheduling.annotation.Async;
 
 import java.util.*;
 
-public class EmailService {
+public class NotificationService {
 
-    private Logger log = LogManager.getLogger(EmailService.class);
+    private Logger log = LogManager.getLogger(NotificationService.class);
 
     private String from;
 
@@ -29,7 +30,7 @@ public class EmailService {
     private ResourceBundleMessageSource resource;
 
     @Autowired
-    private EmailServiceGateway emailServiceGateway;
+    private NotificationServiceGateway notificationServiceGateway;
 
     @Autowired
     private DocgenServiceGateway docgenServiceGateway;
@@ -64,7 +65,33 @@ public class EmailService {
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
-        emailServiceGateway.sendMail(emailRequest);
+        notificationServiceGateway.sendMail(emailRequest);
+    }
+
+    @Async
+    public void sendUserLockedMessage(final UserDTO user) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("email", user.getEmail());
+        metadata.put("id", user.getId());
+        metadata.put("role", UserRole.valueOf(user.getRole()).getDescription());
+        metadata.put("name", user.getFullName());
+        metadata.put("uri", buildEditUserUri(serverWeb, user));
+        notificationServiceGateway.postToTeams("user_locked", metadata);
+    }
+
+    private static String buildEditUserUri(String serverWeb, UserDTO user) {
+        String uri = serverWeb + "#/";
+        if (UserRole.SELLER.name().equals(user.getRole())) {
+            uri += "sellers/edit/" + user.getId();
+        }
+        if (UserRole.BIDDER.name().equals(user.getRole())) {
+            uri += "investors/edit/" + user.getId();
+        }
+        if (UserRole.INTRODUCER.name().equals(user.getRole())) {
+            uri += "introducers/edit/" + user.getId();
+        }
+        return uri;
+
     }
 
     @Async
@@ -90,7 +117,7 @@ public class EmailService {
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
-        emailServiceGateway.sendMail(emailRequest);
+        notificationServiceGateway.sendMail(emailRequest);
     }
 
     @Async
@@ -116,7 +143,7 @@ public class EmailService {
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
-        emailServiceGateway.sendMail(emailRequest);
+        notificationServiceGateway.sendMail(emailRequest);
     }
 
     @Async
@@ -141,7 +168,7 @@ public class EmailService {
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
-        emailServiceGateway.sendMail(emailRequest);
+        notificationServiceGateway.sendMail(emailRequest);
     }
 
     @Async
@@ -171,7 +198,7 @@ public class EmailService {
         emailRequest.setAuthor(user);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(inviter, JsonUtils.getLogView(emailOption));
-        emailServiceGateway.sendMail(emailRequest);
+        notificationServiceGateway.sendMail(emailRequest);
     }
 
     public String getFrom() {

@@ -84,6 +84,16 @@ public abstract class VeloService<T extends VeloService> {
             path.append("/email/request-mail");
             return this;
         }
+
+        public notification msTeams() {
+            path.append("/ms-teams");
+            return this;
+        }
+
+        public notification push() {
+            path.append("/push");
+            return this;
+        }
     }
 
     public static class docgen extends VeloService<docgen> {

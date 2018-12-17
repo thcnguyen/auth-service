@@ -7,7 +7,7 @@ import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.dto.UserSessionDTO;
 import exchange.velox.authservice.mvc.TokenExpiredException;
-import exchange.velox.authservice.service.EmailService;
+import exchange.velox.authservice.service.NotificationService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UserService;
 import io.swagger.annotations.*;
@@ -40,7 +40,7 @@ public class UserController {
     private TokenService tokenService;
 
     @Autowired
-    private EmailService emailService;
+    private NotificationService notificationService;
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     @ApiOperation(value = "Login")
@@ -72,7 +72,8 @@ public class UserController {
         if (!authService.verifyPassword(user.getPassword(), passMd5)) {
             int remainingLoginAttempts = userService.handleUserMaxLogin(user.getId());
             if (remainingLoginAttempts < 0) {
-                emailService.sendMaxLoginAttemptReached(user);
+                notificationService.sendMaxLoginAttemptReached(user);
+                notificationService.sendUserLockedMessage(user);
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
                             .message("User disabled");
             } else {
@@ -181,7 +182,7 @@ public class UserController {
                         .message("This user has been banned, please contact administrator for more information");
         }
         PasswordToken pwdToken = userService.generateForgottenPasswordToken(email);
-        emailService.sendForgotPasswordMail(user, pwdToken.getToken());
+        notificationService.sendForgotPasswordMail(user, pwdToken.getToken());
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.GET)
@@ -268,8 +269,7 @@ public class UserController {
         if (token == null) {
             throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST);
         }
-        emailService.sendMemberRegistrationMail(invitedUser, token.getToken(), companyName, currentUser);
-
+        notificationService.sendMemberRegistrationMail(invitedUser, token.getToken(), companyName, currentUser);
     }
 
     @RequestMapping(value = "/token/forgotPassword", method = RequestMethod.PUT)
@@ -309,9 +309,9 @@ public class UserController {
         user.setPassword(authService.hidePassword(password));
         String companyName = userService.updateForgottenPassword(user, isInitiating);
         if (isInitiating) {
-            emailService.sendInitiatedPasswordMail(user, companyName);
+            notificationService.sendInitiatedPasswordMail(user, companyName);
         } else {
-            emailService.sendChangedPasswordMail(user);
+            notificationService.sendChangedPasswordMail(user);
         }
         return userService.generateForgottenPasswordSession(user);
     }
