@@ -1,11 +1,14 @@
 package exchange.velox.authservice.config;
 
+import exchange.velox.authservice.dto.UserDTO;
+import exchange.velox.authservice.dto.UserNotificationDTO;
+import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
-import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.gateway.LogServiceGateway;
+import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.gateway.impl.DocgenServiceGatewayImpl;
-import exchange.velox.authservice.gateway.impl.NotificationServiceGatewayImpl;
 import exchange.velox.authservice.gateway.impl.LogServiceGatewayImpl;
+import exchange.velox.authservice.gateway.impl.NotificationServiceGatewayImpl;
 import exchange.velox.authservice.mvc.JsonHttpExceptionHandler;
 import exchange.velox.authservice.mvc.RequestLoggerFilter;
 import exchange.velox.authservice.service.NotificationService;
@@ -13,6 +16,8 @@ import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UtilsService;
 import net.etalia.crepuscolo.auth.AuthService;
 import net.etalia.crepuscolo.auth.AuthServiceImpl;
+import org.modelmapper.Converter;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -106,7 +111,7 @@ public class Config implements WebMvcConfigurer {
 
     @Bean
     public NotificationService notificationService(@Value("${mail.from}") String from,
-                                            @Value("${server.web}") String serverWeb) {
+                                                   @Value("${server.web}") String serverWeb) {
         NotificationService notificationService = new NotificationService();
         notificationService.setFrom(from);
         notificationService.setServerWeb(serverWeb);
@@ -124,5 +129,26 @@ public class Config implements WebMvcConfigurer {
     @Bean
     public LogServiceGateway logServiceGateway() {
         return new LogServiceGatewayImpl();
+    }
+
+    @Bean
+    ModelMapper modelMapper() {
+        ModelMapper modelMapper = new ModelMapper();
+        Converter<UserDTO, UserNotificationDTO> toUserNotificationDTOConverter = mappingContext -> {
+            if (mappingContext.getSource().getSearchableId() != null) {
+                mappingContext.getDestination()
+                            .setHumanId(Integer.valueOf(mappingContext.getSource().getSearchableId()));
+            }
+            mappingContext.getDestination().setFullName(mappingContext.getSource().getFullName());
+            mappingContext.getDestination().setId(mappingContext.getSource().getId());
+            mappingContext.getDestination().setEmail(mappingContext.getSource().getEmail());
+            mappingContext.getDestination().setRole(mappingContext.getSource().getRole());
+            mappingContext.getDestination()
+                        .setRoleDescription(UserRole.valueOf(mappingContext.getSource().getRole()).getDescription());
+            return mappingContext.getDestination();
+        };
+        modelMapper.createTypeMap(UserDTO.class, UserNotificationDTO.class)
+                    .setConverter(toUserNotificationDTOConverter);
+        return modelMapper;
     }
 }

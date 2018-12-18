@@ -1,14 +1,12 @@
 package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.dto.EmailOptionDTO;
-import exchange.velox.authservice.dto.EmailRequestDTO;
-import exchange.velox.authservice.dto.UserDTO;
-import exchange.velox.authservice.dto.UserRole;
+import exchange.velox.authservice.dto.*;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
 import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.util.JsonUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.scheduling.annotation.Async;
@@ -34,6 +32,9 @@ public class NotificationService {
 
     @Autowired
     private DocgenServiceGateway docgenServiceGateway;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     private Map<String, Object> initDefaultModel() {
         Map<String, Object> model = new HashMap<>();
@@ -62,7 +63,9 @@ public class NotificationService {
         log.info("Sending user locked " + user.getEmail());
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
-        emailRequest.setAuthor(user);
+        UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
+        modelMapper.map(user,userNotificationDTO);
+        emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
         notificationServiceGateway.sendMail(emailRequest);
@@ -114,7 +117,9 @@ public class NotificationService {
         log.info("Sending forgot password mail to " + user.getEmail() + " with token " + token);
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
-        emailRequest.setAuthor(user);
+        UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
+        modelMapper.map(user,userNotificationDTO);
+        emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
         notificationServiceGateway.sendMail(emailRequest);
@@ -140,7 +145,9 @@ public class NotificationService {
         log.info("Sending initiation mail to " + user.getEmail());
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
-        emailRequest.setAuthor(user);
+        UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
+        modelMapper.map(user,userNotificationDTO);
+        emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
         notificationServiceGateway.sendMail(emailRequest);
@@ -165,7 +172,9 @@ public class NotificationService {
         log.info("Sending password changed mail to " + user.getEmail());
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
-        emailRequest.setAuthor(user);
+        UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
+        modelMapper.map(user,userNotificationDTO);
+        emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JsonUtils.getLogView(emailOption));
         notificationServiceGateway.sendMail(emailRequest);
@@ -195,7 +204,9 @@ public class NotificationService {
         log.info("Sending invitation mail to " + user.getEmail());
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
-        emailRequest.setAuthor(user);
+        UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
+        modelMapper.map(user,userNotificationDTO);
+        emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(inviter, JsonUtils.getLogView(emailOption));
         notificationServiceGateway.sendMail(emailRequest);

@@ -78,10 +78,10 @@ public class UserService {
             UserDTO user = userDAO.load(session.getUserId());
             if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
                 user.setPermissions(userDAO.getPermissionListByUser(user));
-                return utilsService.mapToUserSessionDTO(user, session); // GOOD
+                return utilsService.mapToUserSessionDTO(user, session);
             } else {
                 throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
-                            .message("The access token expired"); // BAD
+                            .message("The access token expired");
             }
         }
         throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");

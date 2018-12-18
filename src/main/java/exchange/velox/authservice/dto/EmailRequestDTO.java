@@ -9,7 +9,7 @@ import java.util.List;
 public class EmailRequestDTO implements Serializable {
 
     private List<EmailOptionDTO> emailContent;
-    private UserDTO author;
+    private UserNotificationDTO author;
 
     public enum TemplateType {
         userLocked,
@@ -27,19 +27,19 @@ public class EmailRequestDTO implements Serializable {
         this.emailContent = emailContent;
     }
 
-    public UserDTO getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(UserDTO author) {
-        this.author = author;
-    }
-
     @Override
     public String toString() {
         return "EmailRequestDTO{" +
                     "emailContent=" + emailContent +
                     ", author=" + author +
                     '}';
+    }
+
+    public UserNotificationDTO getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(UserNotificationDTO author) {
+        this.author = author;
     }
 }
