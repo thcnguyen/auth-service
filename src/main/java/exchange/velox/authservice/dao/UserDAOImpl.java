@@ -53,13 +53,13 @@ public class UserDAOImpl implements UserDAO {
     public UserDTO enrichUserInfo(UserDTO userDTO) {
         StringBuilder queryBuilder = new StringBuilder();
         if (userDTO.getRole().equals(UserRole.SELLER.name())) {
-            queryBuilder.append("select su.firstname,su.lastname from seller s " +
+            queryBuilder.append("select su.firstname,su.lastname,su.searchableId from seller s " +
                                             "inner join sellerUser su on s.id = su.seller_Id where su.id =?1");
         } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
-            queryBuilder.append("select bu.firstname,bu.lastname from bidder b " +
+            queryBuilder.append("select bu.firstname,bu.lastname,bu.searchableId from bidder b " +
                                             "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
         } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
-            queryBuilder.append("select firstname,lastname from introducer where id  =?1");
+            queryBuilder.append("select firstname,lastname,searchableId from introducer where id  =?1");
         }
         if(StringUtils.isEmpty(queryBuilder)) {
             return userDTO;
@@ -71,6 +71,7 @@ public class UserDAOImpl implements UserDAO {
             if (result != null && result.length > 0) {
                 userDTO.setFirstname(String.valueOf(result[0]));
                 userDTO.setLastname(String.valueOf(result[1]));
+                userDTO.setSearchableId(String.valueOf(result[2]));
             }
         } catch (Exception e) {
             // ignore

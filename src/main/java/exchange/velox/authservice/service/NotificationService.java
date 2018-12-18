@@ -72,7 +72,7 @@ public class NotificationService {
     public void sendUserLockedMessage(final UserDTO user) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("email", user.getEmail());
-        metadata.put("id", user.getId());
+        metadata.put("id", user.getHumanId());
         metadata.put("role", UserRole.valueOf(user.getRole()).getDescription());
         metadata.put("name", user.getFullName());
         metadata.put("uri", buildEditUserUri(serverWeb, user));

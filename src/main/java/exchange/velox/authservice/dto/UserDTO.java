@@ -16,6 +16,7 @@ public class UserDTO {
     private Set<String> permissions = new HashSet<>();
     private String firstname;
     private String lastname;
+    private String searchableId;
 
     private int loginAttempt = 0;
 
@@ -79,7 +80,7 @@ public class UserDTO {
         ++loginAttempt;
     }
 
-    public boolean hasRemainingLoginAttempts(){
+    public boolean hasRemainingLoginAttempts() {
         return getLoginAttempt() <= MAX_LOGIN_ATTEMPTS;
     }
 
@@ -129,6 +130,35 @@ public class UserDTO {
 
     public String getFullName() {
         return getFirstname() + " " + getLastname();
+    }
+
+    public String getSearchableId() {
+        return searchableId;
+    }
+
+    public void setSearchableId(String searchableId) {
+        this.searchableId = searchableId;
+    }
+
+    public String getHumanId() {
+        if (getSearchableId() == null) {
+            return null;
+        }
+        String prefix = getPrefixByRole(role);
+        return String.format("%s%s", prefix, getSearchableId());
+    }
+
+    public static String getPrefixByRole(String role) {
+        if (UserRole.SELLER_COMPANY.name().equals(role)) {
+            return "S";
+        } else if (UserRole.BIDDER_COMPANY.name().equals(role)) {
+            return "B";
+        } else if (UserRole.INTRODUCER.name().equals(role)) {
+            return "I";
+        } else if (UserRole.SELLER.name().equals(role) | UserRole.BIDDER.name().equals(role)) {
+            return "E";
+        }
+        return null;
     }
 }
 
