@@ -3,7 +3,8 @@ package exchange.velox.authservice.service;
 import exchange.velox.authservice.dto.*;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
 import exchange.velox.authservice.gateway.NotificationServiceGateway;
-import exchange.velox.authservice.util.JsonUtils;
+import exchange.velox.authservice.util.view.Views;
+import exchange.velox.commonUtils.JSONUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;
@@ -67,7 +68,7 @@ public class NotificationService {
         modelMapper.map(user,userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        logService.addLog(null, JsonUtils.getLogView(emailOption));
+        logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
         notificationServiceGateway.sendMail(emailRequest);
     }
 
@@ -121,7 +122,7 @@ public class NotificationService {
         modelMapper.map(user,userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        logService.addLog(null, JsonUtils.getLogView(emailOption));
+        logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
         notificationServiceGateway.sendMail(emailRequest);
     }
 
@@ -149,7 +150,7 @@ public class NotificationService {
         modelMapper.map(user,userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        logService.addLog(null, JsonUtils.getLogView(emailOption));
+        logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
         notificationServiceGateway.sendMail(emailRequest);
     }
 
@@ -176,7 +177,7 @@ public class NotificationService {
         modelMapper.map(user,userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        logService.addLog(null, JsonUtils.getLogView(emailOption));
+        logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
         notificationServiceGateway.sendMail(emailRequest);
     }
 
@@ -208,7 +209,7 @@ public class NotificationService {
         modelMapper.map(user,userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
-        logService.addLog(inviter, JsonUtils.getLogView(emailOption));
+        logService.addLog(inviter, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
         notificationServiceGateway.sendMail(emailRequest);
     }
 

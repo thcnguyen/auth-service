@@ -2,7 +2,7 @@ package exchange.velox.authservice;
 
 import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.dto.UserSessionDTO;
-import exchange.velox.authservice.util.JsonUtils;
+import exchange.velox.commonUtils.JSONUtils;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -80,7 +80,7 @@ public class UserAPITest extends SpringBootBaseWebTest {
             _checkTokenValid(token);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode().value(), 401);
-            Assert.assertEquals(JsonUtils.readToMap(e.getResponseBodyAsString()).get("message"), "Invalid Token");
+            Assert.assertEquals(JSONUtils.stringToMap(e.getResponseBodyAsString()).get("message"), "Invalid Token");
 
         }
     }
@@ -103,7 +103,7 @@ public class UserAPITest extends SpringBootBaseWebTest {
             _logout(token);
         } catch (HttpClientErrorException e) {
             Assert.assertEquals(e.getStatusCode().value(), 404);
-            Assert.assertEquals(JsonUtils.readToMap(e.getResponseBodyAsString()).get("message"), "Not Found");
+            Assert.assertEquals(JSONUtils.stringToMap(e.getResponseBodyAsString()).get("message"), "Not Found");
         }
     }
 

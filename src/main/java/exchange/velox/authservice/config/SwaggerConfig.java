@@ -1,6 +1,6 @@
 package exchange.velox.authservice.config;
 
-import exchange.velox.authservice.util.JsonUtils;
+import exchange.velox.commonUtils.JSONUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +14,6 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class SwaggerConfig {
         try {
             try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("git.properties")) {
                 String gitString = IOUtils.toString(inputStream, "UTF-8");
-                Map<String, Object> gitInfo = JsonUtils.readToMap(gitString);
+                Map<String, Object> gitInfo = JSONUtils.stringToMap(gitString);
                 return String.valueOf(gitInfo.get("git.build.version")) + "-" + String
                             .valueOf(gitInfo.get("git.commit.id.abbrev"));
             }
