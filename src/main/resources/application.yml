@@ -29,7 +29,7 @@ spring:
     username: local
     password: local
 server:
-  web: http://localhost:4200/
+  web: https://localhost:4200/
 
 ---
 spring:
@@ -39,7 +39,7 @@ spring:
     username: development
     password: BaR#!09Nes$$!Ca
 server:
-  web: http://frontend-dev.velotrade.tech/
+  web: https://development.velotrade.tech/
 
 ---
 spring:
@@ -49,7 +49,7 @@ spring:
     username: e2etest
     password: bCYmTXwb34yVzjZT
 server:
-  web: http://frontend-e2etest.velotrade.tech/
+  web: https://frontend-e2etest.velotrade.tech/
 
 ---
 spring:
