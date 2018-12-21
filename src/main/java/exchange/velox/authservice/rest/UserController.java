@@ -85,6 +85,9 @@ public class UserController {
             if (!userService.isUserApproved(user)) {
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
                             .message("User disabled");
+            } else if (UserRole.SELLER.name().equals(user.getRole()) || UserRole.BIDDER.name().equals(user.getRole())) {
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                            .message("User disabled");
             } else {
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("NOTVALIDATED")
                             .message("User not validated");
