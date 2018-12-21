@@ -301,7 +301,7 @@ public class UserController {
         } else {
             user = tokenService.validateForgottenPasswordTokenAndGetUser(token);
         }
-        if (BooleanUtils.isFalse(user.isActive())) {
+        if (BooleanUtils.isFalse(user.isActive()) && StringUtils.isNotBlank(user.getPassword())) {
             log.info("We do not allow to update forgotten password for BANNED user: {}", user.getEmail());
             throw new HandledHttpException().statusCode(500)
                         .message("This user has been banned, please contact administrator for more information");
