@@ -7,18 +7,18 @@ import exchange.velox.authservice.dto.UserSessionDTO;
 public class UtilsService {
     public UserDTO mapToUserDTO(Object[] source) {
         UserDTO userDTO = new UserDTO();
-        userDTO.setId(String.valueOf(source[0]));
-        userDTO.setEmail(String.valueOf(source[1]));
-        userDTO.setPassword(String.valueOf(source[2]));
-        userDTO.setRole(String.valueOf(source[3]));
-        userDTO.setActive(Boolean.valueOf((String.valueOf(source[4]))));
+        userDTO.setId(stringValueOf(source[0]));
+        userDTO.setEmail(stringValueOf(source[1]));
+        userDTO.setPassword(stringValueOf(source[2]));
+        userDTO.setRole(stringValueOf((source[3])));
+        userDTO.setActive(Boolean.valueOf((stringValueOf(source[4]))));
         if (source[5] != null) {
-            userDTO.setLastLogin(Long.valueOf(String.valueOf(source[5])));
+            userDTO.setLastLogin(Long.valueOf(stringValueOf(source[5])));
         } else {
             userDTO.setLastLogin(null);
         }
-        userDTO.setLoginAttempt(Integer.valueOf(String.valueOf(source[6])));
-        userDTO.setLang(String.valueOf(source[7]));
+        userDTO.setLoginAttempt(Integer.valueOf(stringValueOf(source[6])));
+        userDTO.setLang(stringValueOf(source[7]));
         return userDTO;
     }
 
@@ -30,5 +30,10 @@ public class UtilsService {
         session.setRole(user.getRole());
         session.setPermissions(user.getPermissions());
         return session;
+    }
+
+    private String stringValueOf(Object obj) {
+        if (obj == null) return null;
+        return String.valueOf(obj);
     }
 }
