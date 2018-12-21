@@ -45,7 +45,7 @@ pipeline {
                         k8s_server_username = "ubuntu"
                         k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
                         k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
-                        k8s_service_node_port = ${k8s_service_node_port_development}
+                        k8s_service_node_port = "${k8s_service_node_port_development}"
                     } else if ("${env.BRANCH_NAME}" == "staging") {
                         k8s_app_env = "staging"
                         k8s_test_port_pre = "${k8s_test_port_staging}"
@@ -53,7 +53,7 @@ pipeline {
                         k8s_server_username = "ubuntu"
                         k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
                         k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
-                        k8s_service_node_port = ${k8s_service_node_port_staging}
+                        k8s_service_node_port = "${k8s_service_node_port_staging}"
                     } else {
                         error "Unsupported branch: ${env.BRANCH_NAME}"
                     }
@@ -85,11 +85,6 @@ pipeline {
             }
         }
         stage ('Deploy to k8s') {
-            when {
-                anyOf {
-                    branch 'develop'
-                }
-            }
             steps {
                 sh """
                     echo \"Deploying ${env.BRANCH_NAME} to namespace ${k8s_namespace} on kubernetes at ${k8s_server_host}\"
