@@ -1,6 +1,7 @@
 pipeline {
     agent any
     environment {
+        // These variables are the same for all environments
         k8s_release_name = "auth-release"
         k8s_chart_name = "auth-chart"
         k8s_project_version = readMavenPom().getVersion()
@@ -8,23 +9,77 @@ pipeline {
         k8s_replicas = 1
         k8s_container_port = 9000
         k8s_service_port = 9000
+
+        // These variables are for different environments, put it here to have a full list of all ports used
+        k8s_service_node_port_development = 31000
+        k8s_service_node_port_staging = 31100
+        k8s_service_node_port_production = 31200
+
+        k8s_test_port_development = 8700
+        k8s_test_port_staging = 8800
+
     }
     options {
-      buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '10')
-      disableConcurrentBuilds()
-      timestamps()
+        buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '7', numToKeepStr: '10')
+        disableConcurrentBuilds()
+        timestamps()
     }
     stages {
-        stage ('Test: PRE') {
+
+        stage ('Prepare') {
             when {
                 anyOf {
-                    branch 'master';
+                    branch 'develop';
+                    branch 'staging';
                 }
             }
             steps {
-                sh "./mvnw -U clean install -Dserver.port=8800"
+                script {
+                    // These variables are expected to be set for each branch/environment
+                    k8s_app_env = "undefined"
+                    k8s_test_port_pre = 0
+                    k8s_test_port_post = 0
+                    k8s_namespace = "undefined"
+                    k8s_server_username = "undefined"
+                    k8s_server_host = "undefined"
+                    k8s_chart_home = "undefined"
+                    k8s_service_node_port = 0
+                    k8s_replicas = 1
+                    if ("${env.BRANCH_NAME}" == "develop") {
+                        k8s_app_env = "dev"
+                        k8s_test_port_post = "${k8s_test_port_development}"
+                        k8s_namespace = "development"
+                        k8s_server_username = "ubuntu"
+                        k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
+                        k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
+                        k8s_service_node_port = ${k8s_service_node_port_development}
+                    } else if ("${env.BRANCH_NAME}" == "staging") {
+                        k8s_app_env = "staging"
+                        k8s_test_port_pre = "${k8s_test_port_staging}"
+                        k8s_namespace = "development"
+                        k8s_server_username = "ubuntu"
+                        k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
+                        k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
+                        k8s_service_node_port = ${k8s_service_node_port_staging}
+                    } else {
+                        error 'Unsupported branch: ${env.BRANCH_NAME}'
+                    }
+                }
+                sh "echo \"Finished preparing for ${env.BRANCH_NAME} with user $USER\""
             }
         }
+
+        stage ('Test: PRE') {
+            when {
+                expression {
+                    k8s_test_port_pre != 0
+                }
+            }
+            steps {
+                sh "./mvnw -U clean install -Dserver.port=${k8s_test_port_pre}"
+            }
+        }
+
         stage ('Package') {
             steps {
                 sh "echo \"Packaging branch ${env.BRANCH_NAME} with user $USER\""
@@ -36,19 +91,11 @@ pipeline {
                 sh "./mvnw dockerfile:push@push-version -Dgit-revision=$GIT_COMMIT"
             }
         }
-        stage ('Deploy to development') {
+        stage ('Deploy to k8s') {
             when {
                 anyOf {
-                    branch 'master'
+                    branch 'develop'
                 }
-            }
-            environment {
-                k8s_namespace = "development"
-                k8s_app_env = "dev"
-                k8s_server_username = "ubuntu"
-                k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
-                k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
-                k8s_service_node_port = 31000
             }
             steps {
                 sh """
@@ -151,15 +198,23 @@ ENDSSH
                 """
             }
         }
+
         stage ('Test: POST') {
             when {
-                anyOf {
-                    branch 'develop';
+                expression {
+                    k8s_test_port_post != 0
                 }
             }
             steps {
-                sh "./mvnw -U clean install -Dserver.port=8900"
+                sh "./mvnw -U clean install -Dserver.port=${k8s_test_port_post}"
             }
+        }
+
+    }
+
+    post {
+        always {
+            cleanWs()
         }
     }
 }
