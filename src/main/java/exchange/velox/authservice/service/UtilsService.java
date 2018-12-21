@@ -19,6 +19,7 @@ public class UtilsService {
         }
         userDTO.setLoginAttempt(Integer.valueOf(stringValueOf(source[6])));
         userDTO.setLang(stringValueOf(source[7]));
+        userDTO.setTotpRequiredAtLogin(Boolean.valueOf(stringValueOf(source[8])));
         return userDTO;
     }
 
@@ -29,6 +30,7 @@ public class UtilsService {
         session.setToken(userSession.getToken());
         session.setRole(user.getRole());
         session.setPermissions(user.getPermissions());
+        session.setTotpRequiredAtLogin(user.getTotpRequiredAtLogin());
         return session;
     }
 

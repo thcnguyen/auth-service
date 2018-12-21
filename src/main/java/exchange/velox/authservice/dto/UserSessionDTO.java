@@ -12,6 +12,7 @@ public class UserSessionDTO {
     private String token;
     private Set<String> permissions = new HashSet<>();
     private Map<String, Object> extraData = new HashMap<>();
+    private Boolean totpRequiredAtLogin;
 
     public String getId() {
         return id;
@@ -59,5 +60,13 @@ public class UserSessionDTO {
 
     public void setExtraData(Map<String, Object> extraData) {
         this.extraData = extraData;
+    }
+
+    public Boolean getTotpRequiredAtLogin() {
+        return totpRequiredAtLogin;
+    }
+
+    public void setTotpRequiredAtLogin(Boolean totpRequiredAtLogin) {
+        this.totpRequiredAtLogin = totpRequiredAtLogin;
     }
 }
