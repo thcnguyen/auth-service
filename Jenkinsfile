@@ -26,12 +26,6 @@ pipeline {
     stages {
 
         stage ('Prepare') {
-            when {
-                anyOf {
-                    branch 'develop';
-                    branch 'staging';
-                }
-            }
             steps {
                 script {
                     // These variables are expected to be set for each branch/environment
