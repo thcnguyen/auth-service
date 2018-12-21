@@ -6,7 +6,6 @@ pipeline {
         k8s_chart_name = "auth-chart"
         k8s_project_version = readMavenPom().getVersion()
         k8s_image_tag = "${k8s_project_version}.${env.GIT_COMMIT}"
-        k8s_replicas = 1
         k8s_container_port = 9000
         k8s_service_port = 9000
 
