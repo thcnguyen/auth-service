@@ -37,7 +37,7 @@ pipeline {
                     k8s_server_host = "undefined"
                     k8s_chart_home = "undefined"
                     k8s_service_node_port = 0
-                    k8s_replicas = 1
+                    k8s_replicas = 2
                     if ("${env.BRANCH_NAME}" == "develop") {
                         k8s_app_env = "dev"
                         k8s_test_port_post = "${k8s_test_port_development}"
