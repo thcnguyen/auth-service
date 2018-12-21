@@ -49,7 +49,7 @@ pipeline {
                     } else if ("${env.BRANCH_NAME}" == "staging") {
                         k8s_app_env = "staging"
                         k8s_test_port_pre = "${k8s_test_port_staging}"
-                        k8s_namespace = "development"
+                        k8s_namespace = "staging"
                         k8s_server_username = "ubuntu"
                         k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
                         k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
