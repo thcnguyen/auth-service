@@ -55,7 +55,7 @@ pipeline {
                         k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
                         k8s_service_node_port = ${k8s_service_node_port_staging}
                     } else {
-                        error 'Unsupported branch: ${env.BRANCH_NAME}'
+                        error "Unsupported branch: ${env.BRANCH_NAME}"
                     }
                 }
                 sh "echo \"Finished preparing for ${env.BRANCH_NAME} with user $USER\""
