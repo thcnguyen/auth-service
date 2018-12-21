@@ -85,6 +85,9 @@ public class UserController {
             if (!userService.isUserApproved(user)) {
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
                             .message("User disabled");
+            } else if (UserRole.SELLER.name().equals(user.getRole()) || UserRole.BIDDER.name().equals(user.getRole())) {
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                            .message("User disabled");
             } else {
                 throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("NOTVALIDATED")
                             .message("User not validated");
@@ -301,7 +304,7 @@ public class UserController {
         } else {
             user = tokenService.validateForgottenPasswordTokenAndGetUser(token);
         }
-        if (BooleanUtils.isFalse(user.isActive())) {
+        if (BooleanUtils.isFalse(user.isActive()) && StringUtils.isNotBlank(user.getPassword())) {
             log.info("We do not allow to update forgotten password for BANNED user: {}", user.getEmail());
             throw new HandledHttpException().statusCode(500)
                         .message("This user has been banned, please contact administrator for more information");

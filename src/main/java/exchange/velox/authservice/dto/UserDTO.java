@@ -17,6 +17,7 @@ public class UserDTO {
     private String firstname;
     private String lastname;
     private String searchableId;
+    private Boolean totpRequiredAtLogin;
 
     private int loginAttempt = 0;
 
@@ -146,6 +147,14 @@ public class UserDTO {
         }
         String prefix = getPrefixByRole(role);
         return String.format("%s%s", prefix, getSearchableId());
+    }
+
+    public Boolean getTotpRequiredAtLogin() {
+        return totpRequiredAtLogin;
+    }
+
+    public void setTotpRequiredAtLogin(Boolean totpRequiredAtLogin) {
+        this.totpRequiredAtLogin = totpRequiredAtLogin;
     }
 
     public static String getPrefixByRole(String role) {
