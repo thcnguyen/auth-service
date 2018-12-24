@@ -8,6 +8,7 @@ import exchange.velox.authservice.domain.PasswordToken;
 import exchange.velox.authservice.domain.UserSession;
 import exchange.velox.authservice.dto.*;
 import exchange.velox.authservice.mvc.TokenExpiredException;
+import exchange.velox.authservice.mvc.UserDisabledException;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -76,9 +77,14 @@ public class UserService {
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             UserDTO user = userDAO.load(session.getUserId());
-            if (checkTimeValidityCondition(session.getExpireDate()) && isUserCompanyActive(user)) {
-                user.setPermissions(userDAO.getPermissionListByUser(user));
-                return utilsService.mapToUserSessionDTO(user, session);
+            if (checkTimeValidityCondition(session.getExpireDate())) {
+                if (isUserCompanyActive(user)) {
+                    user.setPermissions(userDAO.getPermissionListByUser(user));
+                    return utilsService.mapToUserSessionDTO(user, session);
+                }
+                throw new UserDisabledException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("DISABLED")
+                            .message("User disabled");
+
             } else {
                 throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
                             .message("The access token expired");
