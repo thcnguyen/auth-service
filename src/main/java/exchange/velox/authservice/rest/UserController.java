@@ -7,6 +7,7 @@ import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.dto.UserSessionDTO;
 import exchange.velox.authservice.mvc.TokenExpiredException;
+import exchange.velox.authservice.mvc.UserDisabledException;
 import exchange.velox.authservice.service.NotificationService;
 import exchange.velox.authservice.service.TokenService;
 import exchange.velox.authservice.service.UserService;
@@ -144,7 +145,7 @@ public class UserController {
         UserSessionDTO sessionDTO;
         try {
             sessionDTO = userService.checkValidToken(authorization);
-        } catch (TokenExpiredException e) {
+        } catch (TokenExpiredException | UserDisabledException e) {
             userService.logout(authorization, true);
             throw e;
         }
