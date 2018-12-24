@@ -176,7 +176,7 @@ spec:
     nodePort: ${k8s_service_node_port}
   selector:
     app: auth-app
-  type: LoadBalancer
+  type: NodePort
 EOF
 
 helm upgrade ${k8s_release_name} ${k8s_chart_home} --install
