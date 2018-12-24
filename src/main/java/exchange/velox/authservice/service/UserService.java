@@ -82,7 +82,7 @@ public class UserService {
                     user.setPermissions(userDAO.getPermissionListByUser(user));
                     return utilsService.mapToUserSessionDTO(user, session);
                 }
-                throw new UserDisabledException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                throw new UserDisabledException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("DISABLED")
                             .message("User disabled");
 
             } else {
