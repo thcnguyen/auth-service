@@ -257,8 +257,8 @@ public class UserService {
     public ClientType getClientType(String userAgent) {
         final Capabilities capabilities = userAgentParser.parse(userAgent);
         final String platform = capabilities.getPlatform();
-        final String browserType = capabilities.getBrowserType();
-        if (ClientType.Application.name().equals(browserType)) {
+        final String deviceType = capabilities.getDeviceType();
+        if ("Mobile Phone".equals(deviceType)) {
             if (ClientType.ANDROID.name().equalsIgnoreCase(platform)) {
                 return ClientType.ANDROID;
             }
