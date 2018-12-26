@@ -67,6 +67,7 @@ public class UserService {
         userSession.setClientType(getClientType(userAgent));
         userSession.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
         userSession.setToken(tokenService.generateRandomToken());
+        userSession.setUserAgent(userAgent);
         return userSessionDAO.save(userSession);
     }
 

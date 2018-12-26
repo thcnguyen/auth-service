@@ -15,3 +15,5 @@
       tokenType varchar(20) not null,
       primary key (id)
   ) ENGINE=InnoDB;
+
+alter table userSession add column userAgent varchar(512);

@@ -13,6 +13,7 @@ public class UserSession {
     private String token;
     private ClientType clientType;
     private Long expireDate;
+    private String userAgent;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +61,15 @@ public class UserSession {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    @Column(length = 512)
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 }
 
