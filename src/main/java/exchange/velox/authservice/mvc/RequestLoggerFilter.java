@@ -19,6 +19,12 @@ public class RequestLoggerFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
                 ServletException {
+
+		if (!log.isDebugEnabled()) {
+			chain.doFilter(request, response);
+			return;
+		}
+
 		long start = System.currentTimeMillis();
 		chain.doFilter(request, response);
 		long end = System.currentTimeMillis();
@@ -36,7 +42,7 @@ public class RequestLoggerFilter implements Filter {
 		if (response instanceof HttpServletResponse) {
 			code = ((HttpServletResponse) response).getStatus();
 		}
-		log.info("TIME: " + time + " - CODE: " + code + " - METHOD: " + method + " - URL: " + url + " - PARAMS: " + queryString);
+		log.debug("TIME: " + time + " - CODE: " + code + " - METHOD: " + method + " - URL: " + url + " - PARAMS: " + queryString);
 	}
 
 	@Override

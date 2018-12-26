@@ -1,0 +1,16 @@
+Configutation:
+  name: Default
+  include:
+  Properties:
+  Appenders:
+    Console:
+      name: Console_Appender
+      target: SYSTEM_OUT
+      PatternLayout:
+        alwaysWriteExceptions: false
+        pattern: "%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{%5p} %clr{%pid}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%enc{%xEx}%n"
+  Loggers:
+    AsyncRoot:
+      level: info
+      AppenderRef:
+      - ref: Console_Appender

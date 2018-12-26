@@ -13,8 +13,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Ordered {
 
@@ -29,7 +27,6 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
         HttpException htex;
         if (!(ex instanceof HttpException)) {
             htex = new HttpException().cause(ex);
-            log.error("Found an Error", ex);
         } else {
             htex = (HttpException) ex;
         }
@@ -55,24 +52,22 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
                 setErrorStatus(response, statusCode, errorCode);
             }
 
-            if (!StringUtils.hasLength(errorCode))
+            if (!StringUtils.hasLength(errorCode)) {
                 errorCode = "ERROR";
-            ChainMap<Object> errmap = new ChainMap<Object>("code", errorCode).add("message", reason);
-
-            if (log.isDebugEnabled()) {
-                StringWriter sw = new StringWriter();
-                htex.printStackTrace(new PrintWriter(sw));
-                sw.close();
-                errmap.add("stack", sw.toString());
             }
+            ChainMap<Object> errmap = new ChainMap<Object>("code", errorCode).add("message", reason);
 
             if (htex.getProperties() != null) {
                 errmap.putAll(htex.getProperties());
             }
 
+            log.error(errmap, ex);
+
             return new ModelAndView(new JsonView(), errmap);
 
         } catch (Exception e) {
+            log.error(ex.getMessage(), ex);
+            log.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }
