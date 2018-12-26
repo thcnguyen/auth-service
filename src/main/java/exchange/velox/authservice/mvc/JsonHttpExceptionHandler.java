@@ -52,7 +52,7 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
             if (!StringUtils.hasLength(reason)) {
                 response.setStatus(statusCode);
             } else {
-                response.sendError(statusCode, errorCode);
+                setErrorStatus(response, statusCode, errorCode);
             }
 
             if (!StringUtils.hasLength(errorCode))
@@ -75,6 +75,11 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void setErrorStatus(HttpServletResponse response, int statusCode, String errorCode) {
+        response.setStatus(statusCode, errorCode);
     }
 
     @Override
