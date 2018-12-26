@@ -175,7 +175,7 @@
         <dependency>
             <groupId>com.github.VeloxManagementLimited</groupId>
             <artifactId>common-utils</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>541ce8e826</version>
         </dependency>
 	</dependencies>
 
