@@ -93,7 +93,7 @@ public class TokenService {
     }
 
     public void userNotFound() {
-        throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("NOT_FOUND")
+        throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("USER_NOT_FOUND")
                     .message("User is not found");
     }
 

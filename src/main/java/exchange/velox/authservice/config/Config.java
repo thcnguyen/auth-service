@@ -1,5 +1,8 @@
 package exchange.velox.authservice.config;
 
+import com.blueconic.browscap.ParseException;
+import com.blueconic.browscap.UserAgentParser;
+import com.blueconic.browscap.UserAgentService;
 import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.UserNotificationDTO;
 import exchange.velox.authservice.dto.UserRole;
@@ -31,6 +34,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.io.IOException;
 
 @Configuration
 @EnableAsync
@@ -150,5 +155,10 @@ public class Config implements WebMvcConfigurer {
         modelMapper.createTypeMap(UserDTO.class, UserNotificationDTO.class)
                     .setConverter(toUserNotificationDTOConverter);
         return modelMapper;
+    }
+
+    @Bean
+    public UserAgentParser userAgentParser() throws IOException, ParseException {
+        return new UserAgentService().loadParser();
     }
 }

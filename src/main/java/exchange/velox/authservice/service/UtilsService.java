@@ -1,7 +1,7 @@
 package exchange.velox.authservice.service;
 
-import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.domain.UserSession;
+import exchange.velox.authservice.dto.UserDTO;
 import exchange.velox.authservice.dto.UserSessionDTO;
 
 public class UtilsService {
@@ -35,7 +35,8 @@ public class UtilsService {
     }
 
     private String stringValueOf(Object obj) {
-        if (obj == null) return null;
+        if (obj == null)
+            return null;
         return String.valueOf(obj);
     }
 }

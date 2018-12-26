@@ -51,9 +51,11 @@ public class UserController {
                 @ApiResponse(code = 404, message = "User is not found")
     })
     @ApiImplicitParams({
-                @ApiImplicitParam(name = "Authorization", paramType = "header")
+                @ApiImplicitParam(name = "Authorization", paramType = "header"),
+                @ApiImplicitParam(name = "User-Agent", paramType = "header")
     })
-    public UserSessionDTO login(@RequestHeader("Authorization") String authorization) {
+    public UserSessionDTO login(@RequestHeader("Authorization") String authorization,
+                                @RequestHeader("User-Agent") String userAgent) {
         if (!authorization.split("_", 2)[0].equals(AuthConfig.AUTHENTICATION_SIGN)) {
             throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("AUTH_ERROR")
                         .message("Header with invalid realm");
@@ -63,10 +65,10 @@ public class UserController {
         String passMd5 = authParts[1]; // this password is built by: System.out.println(new String(Base64.getEncoder().encode(DigestUtils.md5("PLAIN PASSWORD")), "UTF-8"));
         UserDTO user = userService.findUserByEmail(email);
         if (user == null)
-            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("NOTFOUND")
-                        .message("Cannot find user with email " + email);
+            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("NOT_FOUND_USER_WITH_EMAIL")
+                        .message("Cannot find user with email " + email).property("EMAIL", email);
         if (user.getPassword() == null) {
-            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("NOTFOUND")
+            throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("ACCOUNT_IS_NOT_INITIATED")
                         .message("Your account is not initiated");
         }
 
@@ -97,26 +99,26 @@ public class UserController {
 
         if (UserRole.SELLER.name().equals(user.getRole())) {
             if (!userService.isUserApproved(user)) {
-                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("SELLER_NOT_VALIDATED")
                             .message("Seller not validated");
             }
             if (!userService.isUserCompanyActive(user)) {
-                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("SELLER_DISABLED")
                             .message("Seller disabled");
             }
         }
         if (UserRole.BIDDER.name().equals(user.getRole())) {
             if (!userService.isUserApproved(user)) {
-                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("BIDDER_NOT_VALIDATED")
                             .message("Bidder not validated");
             }
             if (!userService.isUserCompanyActive(user)) {
-                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("DISABLED")
+                throw new HandledHttpException().statusCode(HttpStatus.FORBIDDEN).errorCode("BIDDER_DISABLED")
                             .message("Bidder disabled");
             }
         }
 
-        return userService.updateUserAndGenerateSession(user);
+        return userService.updateUserAndGenerateSession(user, userAgent);
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.DELETE)
@@ -163,7 +165,8 @@ public class UserController {
     void forgotPassword(
                 @ApiParam(value = "Data model need to be forgot password", required = true) @RequestBody Map<String, String> data) {
         if (!data.containsKey("email")) {
-            throw new HandledHttpException().statusCode(500).message("Body request does not contain 'email'");
+            throw new HandledHttpException().statusCode(500).errorCode("BODY_REQUEST_DOES_NOT_CONTAIN_EMAIL")
+                        .message("Body request does not contain 'email'");
         }
         String email = data.get("email");
         UserDTO user = userService.findUserByEmail(email);
@@ -173,16 +176,17 @@ public class UserController {
         }
         if (!userService.isUserApproved(user)) {
             log.info("We do not allow to forgot password for WAITING user: {}", email);
-            throw new HandledHttpException().statusCode(500).message("Please continue the registration process");
+            throw new HandledHttpException().statusCode(500).errorCode("PLEASE_CONTINUE_THE_REGISTRATION")
+                        .message("Please continue the registration process");
         }
         if (!userService.isUserInitiated(user)) {
             log.info("We do not allow to forgot password for WAITING user: {}", email);
-            throw new HandledHttpException().statusCode(500)
+            throw new HandledHttpException().statusCode(500).errorCode("USER_HAS_NOT_BEEN_INITIATED")
                         .message("This user has not been initiated, please continue the registration process");
         }
         if (BooleanUtils.isFalse(user.isActive())) {
             log.info("We do not allow to forgot password for BANNED user: {}", email);
-            throw new HandledHttpException().statusCode(500)
+            throw new HandledHttpException().statusCode(500).errorCode("USER_HAS_BEEN_BANNED")
                         .message("This user has been banned, please contact administrator for more information");
         }
         PasswordToken pwdToken = userService.generateForgottenPasswordToken(email);
@@ -283,12 +287,13 @@ public class UserController {
                 @ApiResponse(code = 401, message = "You are not authorized"),
                 @ApiResponse(code = 400, message = "Missing parameter 'password'")
     })
-    public UserSessionDTO updateForgottenPassword(
+    public ResponseEntity updateForgottenPassword(
                 @ApiParam(value = "Data model need to be update forgot password", required = true) @RequestBody Map<String, String> data) {
         String password = data.get("password");
         if (StringUtils.isEmpty(password)) {
             log.info("Missing parameter 'password'");
-            throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST).message("Missing parameter 'password'");
+            throw new HandledHttpException().statusCode(HttpStatus.BAD_REQUEST)
+                        .errorCode("BODY_REQUEST_MISSING_PASSWORD").message("Missing parameter 'password'");
         }
 
         String token = data.get("token");
@@ -307,7 +312,7 @@ public class UserController {
         }
         if (BooleanUtils.isFalse(user.isActive()) && StringUtils.isNotBlank(user.getPassword())) {
             log.info("We do not allow to update forgotten password for BANNED user: {}", user.getEmail());
-            throw new HandledHttpException().statusCode(500)
+            throw new HandledHttpException().statusCode(500).errorCode("USER_HAS_BEEN_BANNED")
                         .message("This user has been banned, please contact administrator for more information");
         }
         user.setPassword(authService.hidePassword(password));
@@ -316,7 +321,11 @@ public class UserController {
             notificationService.sendInitiatedPasswordMail(user, companyName);
         } else {
             notificationService.sendChangedPasswordMail(user);
+            userService.removeAllSavedLoginSessions(user);
         }
-        return userService.generateForgottenPasswordSession(user);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("result", "OK");
+        return ResponseEntity.ok(result);
     }
 }

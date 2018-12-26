@@ -1,5 +1,7 @@
 package exchange.velox.authservice.service;
 
+import com.blueconic.browscap.Capabilities;
+import com.blueconic.browscap.UserAgentParser;
 import exchange.velox.authservice.config.AuthConfig;
 import exchange.velox.authservice.dao.PasswordTokenDAO;
 import exchange.velox.authservice.dao.UserDAO;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -43,6 +46,9 @@ public class UserService {
     @Autowired
     private UtilsService utilsService;
 
+    @Autowired
+    private UserAgentParser userAgentParser;
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int handleUserMaxLogin(String userId) {
         UserDTO userDTO = userDAO.load(userId);
@@ -55,11 +61,10 @@ public class UserService {
     }
 
     @Transactional
-    public UserSession generateNewUserSession(UserDTO userDTO) {
+    public UserSession generateNewUserSession(UserDTO userDTO, String userAgent) {
         UserSession userSession = new UserSession();
         userSession.setUserId(userDTO.getId());
-        // TODO : handle client type
-        userSession.setClientType(ClientType.WEB);
+        userSession.setClientType(getClientType(userAgent));
         userSession.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
         userSession.setToken(tokenService.generateRandomToken());
         return userSessionDAO.save(userSession);
@@ -70,27 +75,29 @@ public class UserService {
     public UserSessionDTO checkValidToken(String token) {
 
         if (StringUtils.isEmpty(token)) {
-            throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+            throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("INVALID_TOKEN")
+                        .message("Invalid Token");
         }
 
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             UserDTO user = userDAO.load(session.getUserId());
-            if (checkTimeValidityCondition(session.getExpireDate())) {
-                if (isUserCompanyActive(user)) {
-                    user.setPermissions(userDAO.getPermissionListByUser(user));
-                    return utilsService.mapToUserSessionDTO(user, session);
-                }
-                throw new UserDisabledException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("DISABLED")
-                            .message("User disabled");
 
-            } else {
-                throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
-                            .message("The access token expired");
+            if (ClientType.WEB.name().equals(session.getClientType())) {
+                if (!checkTimeValidityCondition(session.getExpireDate()))
+                    throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
+                                .message("The access token expired");
             }
+            if (isUserCompanyActive(user)) {
+                user.setPermissions(userDAO.getPermissionListByUser(user));
+                return utilsService.mapToUserSessionDTO(user, session);
+            }
+            throw new UserDisabledException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("DISABLED")
+                        .message("User disabled");
         }
-        throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).message("Invalid Token");
+        throw new HandledHttpException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("INVALID_TOKEN")
+                    .message("Invalid Token");
     }
 
     @Transactional
@@ -111,13 +118,13 @@ public class UserService {
     }
 
     @Transactional
-    public UserSessionDTO updateUserAndGenerateSession(UserDTO user) {
+    public UserSessionDTO updateUserAndGenerateSession(UserDTO user, String userAgent) {
         Map<String, Object> extraData = new HashMap<>();
         user.setLastLogin(System.currentTimeMillis());
         user.resetLoginAttempt();
         user.setPermissions(userDAO.getPermissionListByUser(user));
         userDAO.updateUser(user);
-        UserSession session = generateNewUserSession(user);
+        UserSession session = generateNewUserSession(user, userAgent);
         extraData.put("auth", session.getToken());
         UserSessionDTO sessionDTO = utilsService.mapToUserSessionDTO(user, session);
         sessionDTO.setExtraData(extraData);
@@ -131,9 +138,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserSessionDTO generateForgottenPasswordSession(UserDTO user) {
+    public UserSessionDTO generateForgottenPasswordSession(UserDTO user, String userAgent) {
         user.setPermissions(userDAO.getPermissionListByUser(user));
-        UserSession session = generateNewUserSession(user);
+        UserSession session = generateNewUserSession(user, userAgent);
         return utilsService.mapToUserSessionDTO(user, session);
     }
 
@@ -242,4 +249,23 @@ public class UserService {
         return userDAO.getUserCompanyName(user);
     }
 
+    public ClientType getClientType(String userAgent) {
+        final Capabilities capabilities = userAgentParser.parse(userAgent);
+        final String platform = capabilities.getPlatform();
+        if (ClientType.ANDROID.name().equalsIgnoreCase(platform)) {
+            return ClientType.ANDROID;
+        }
+        if (ClientType.IOS.name().equalsIgnoreCase(platform)) {
+            return ClientType.IOS;
+        }
+        return ClientType.WEB;
+    }
+
+    @Transactional
+    public void removeAllSavedLoginSessions(UserDTO user) {
+        Optional<List<UserSession>> sessions = userSessionDAO.findUserSessionsByUserId(user.getId());
+        if (sessions.isPresent()) {
+            sessions.get().forEach(session -> userSessionDAO.delete(session));
+        }
+    }
 }
