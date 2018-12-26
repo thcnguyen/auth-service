@@ -169,7 +169,7 @@ public class UserService {
                 UserSession session = sessionOpt.get();
                 userSessionDAO.delete(session);
             } else {
-                throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND);
+                throw new HandledHttpException().statusCode(HttpStatus.NOT_FOUND).errorCode("SESSION_NOT_FOUND");
             }
         } catch (RuntimeException e) {
             if (silent) {

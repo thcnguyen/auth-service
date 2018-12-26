@@ -61,7 +61,9 @@ public class JsonHttpExceptionHandler implements HandlerExceptionResolver, Order
                 errmap.putAll(htex.getProperties());
             }
 
-            log.error(errmap, ex);
+            if ("ERROR".equals(errorCode)) {
+                log.error(errmap, ex);
+            }
 
             return new ModelAndView(new JsonView(), errmap);
 

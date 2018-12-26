@@ -4,6 +4,7 @@
       expireDate bigint(20),
       token varchar(200) unique,
       userId varchar(255) not null,
+      userAgent varchar(512),
       primary key (id)
   ) ENGINE=InnoDB;
 
@@ -15,5 +16,3 @@
       tokenType varchar(20) not null,
       primary key (id)
   ) ENGINE=InnoDB;
-
-alter table userSession add column userAgent varchar(512);
