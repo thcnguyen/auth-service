@@ -30,7 +30,7 @@ spring:
     username: local
     password: local
 server:
-  web: http://localhost:4200/
+  web: http://local.velotrade.tech/
 
 ---
 spring:

@@ -9,7 +9,7 @@ public interface UserDAO {
     UserDTO findUserByEmail(String email);
     UserDTO enrichUserInfo(UserDTO userDTO);
     String getUserApprovationStep(UserDTO userDTO);
-    String getUserCompanyName(UserDTO userDTO);
+    Object[] getUserCompanyNameAndId(UserDTO userDTO);
     boolean updateUser(UserDTO userDTO);
     boolean getCompanyStatusByUser(UserDTO userDTO);
     Set<String> getPermissionListByUser(UserDTO userDTO);

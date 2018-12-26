@@ -37,6 +37,9 @@ public class NotificationService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private UserService userService;
+
     private Map<String, Object> initDefaultModel() {
         Map<String, Object> model = new HashMap<>();
         model.put("i18n", resource);
@@ -65,7 +68,7 @@ public class NotificationService {
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
         UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
-        modelMapper.map(user,userNotificationDTO);
+        modelMapper.map(user, userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
@@ -83,13 +86,13 @@ public class NotificationService {
         notificationServiceGateway.postToTeams("user_locked", metadata);
     }
 
-    private static String buildEditUserUri(String serverWeb, UserDTO user) {
+    private String buildEditUserUri(String serverWeb, UserDTO user) {
         String uri = serverWeb + "#/";
         if (UserRole.SELLER.name().equals(user.getRole())) {
-            uri += "sellers/edit/" + user.getId();
+            uri += "sellers/edit/" + userService.getUserCompanyId(user);
         }
         if (UserRole.BIDDER.name().equals(user.getRole())) {
-            uri += "investors/edit/" + user.getId();
+            uri += "investors/edit/" + userService.getUserCompanyId(user);
         }
         if (UserRole.INTRODUCER.name().equals(user.getRole())) {
             uri += "introducers/edit/" + user.getId();
@@ -119,7 +122,7 @@ public class NotificationService {
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
         UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
-        modelMapper.map(user,userNotificationDTO);
+        modelMapper.map(user, userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
@@ -147,7 +150,7 @@ public class NotificationService {
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
         UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
-        modelMapper.map(user,userNotificationDTO);
+        modelMapper.map(user, userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
@@ -174,7 +177,7 @@ public class NotificationService {
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
         UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
-        modelMapper.map(user,userNotificationDTO);
+        modelMapper.map(user, userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(null, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));
@@ -206,7 +209,7 @@ public class NotificationService {
         String body = docgenServiceGateway.generateEmailContent(emailOption.getTemplate(), user.getLang(), model);
         emailOption.setBody(body);
         UserNotificationDTO userNotificationDTO = new UserNotificationDTO();
-        modelMapper.map(user,userNotificationDTO);
+        modelMapper.map(user, userNotificationDTO);
         emailRequest.setAuthor(userNotificationDTO);
         emailRequest.setEmailContent(Arrays.asList(emailOption));
         logService.addLog(inviter, JSONUtils.objectToStringWithView(emailOption, Views.LogView.class));

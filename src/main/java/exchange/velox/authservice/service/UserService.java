@@ -235,7 +235,7 @@ public class UserService {
                 user.setActive(Boolean.TRUE);
                 userDAO.updateUser(user);
                 userDAO.updateInitiatedStatus(user, Boolean.TRUE);
-                companyName = userDAO.getUserCompanyName(user);
+                companyName = (String) userDAO.getUserCompanyNameAndId(user)[0];
             }
         } else {
             if (user.isActive()) {
@@ -246,17 +246,24 @@ public class UserService {
     }
 
     public String getUserCompanyName(UserDTO user) {
-        return userDAO.getUserCompanyName(user);
+        return (String) userDAO.getUserCompanyNameAndId(user)[0];
+    }
+
+    public String getUserCompanyId(UserDTO user) {
+        return (String) userDAO.getUserCompanyNameAndId(user)[1];
     }
 
     public ClientType getClientType(String userAgent) {
         final Capabilities capabilities = userAgentParser.parse(userAgent);
         final String platform = capabilities.getPlatform();
-        if (ClientType.ANDROID.name().equalsIgnoreCase(platform)) {
-            return ClientType.ANDROID;
-        }
-        if (ClientType.IOS.name().equalsIgnoreCase(platform)) {
-            return ClientType.IOS;
+        final String browserType = capabilities.getBrowserType();
+        if (ClientType.Application.name().equals(browserType)) {
+            if (ClientType.ANDROID.name().equalsIgnoreCase(platform)) {
+                return ClientType.ANDROID;
+            }
+            if (ClientType.IOS.name().equalsIgnoreCase(platform)) {
+                return ClientType.IOS;
+            }
         }
         return ClientType.WEB;
     }
