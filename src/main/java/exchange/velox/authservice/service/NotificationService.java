@@ -4,7 +4,7 @@ import exchange.velox.authservice.dto.*;
 import exchange.velox.authservice.gateway.DocgenServiceGateway;
 import exchange.velox.authservice.gateway.NotificationServiceGateway;
 import exchange.velox.authservice.util.view.Views;
-import exchange.velox.commonUtils.JSONUtils;
+import exchange.velox.commonutils.JSONUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.modelmapper.ModelMapper;

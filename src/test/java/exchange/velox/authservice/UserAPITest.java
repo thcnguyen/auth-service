@@ -2,7 +2,7 @@ package exchange.velox.authservice;
 
 import exchange.velox.authservice.dto.UserRole;
 import exchange.velox.authservice.dto.UserSessionDTO;
-import exchange.velox.commonUtils.JSONUtils;
+import exchange.velox.commonutils.JSONUtils;
 import net.etalia.crepuscolo.utils.HandledHttpException;
 import org.junit.Assert;
 import org.junit.Before;
