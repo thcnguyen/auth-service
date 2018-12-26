@@ -106,24 +106,24 @@ public class UserDAOImpl implements UserDAO {
     }
 
     @Override
-    public String getUserCompanyName(UserDTO userDTO) {
+    public Object[] getUserCompanyNameAndId(UserDTO userDTO) {
         StringBuilder queryBuilder = new StringBuilder();
-        String result = null;
+        Object[] result = null;
         if (userDTO.getRole().equals(UserRole.SELLER.name())) {
-            queryBuilder.append("select s.companyName from seller s " +
+            queryBuilder.append("select s.companyName, s.id from seller s " +
                                             "inner join sellerUser su on s.id = su.seller_Id where su.id =?1");
         } else if (userDTO.getRole().equals(UserRole.BIDDER.name())) {
-            queryBuilder.append("select b.companyName from bidder b " +
+            queryBuilder.append("select b.companyName, b.id from bidder b " +
                                             "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
         } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
-            queryBuilder.append("select companyName from introducer where id  =?1");
+            queryBuilder.append("select companyName, id from introducer where id  =?1");
         } else {
             return result;
         }
         Query query = entityManager.createNativeQuery(queryBuilder.toString());
         query.setParameter(1, userDTO.getId());
         try {
-            result = (String) query.getSingleResult();
+            result = (Object[]) query.getSingleResult();
         } catch (Exception e) {
             // ignore
         }
