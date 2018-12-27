@@ -85,7 +85,7 @@ public class UserService {
             UserSession session = sessionOpt.get();
             UserDTO user = userDAO.load(session.getUserId());
 
-            if (ClientType.WEB.name().equals(session.getClientType())) {
+            if (ClientType.WEB.equals(session.getClientType())) {
                 if (!checkTimeValidityCondition(session.getExpireDate()))
                     throw new TokenExpiredException().statusCode(HttpStatus.UNAUTHORIZED).errorCode("TOKEN_EXPIRED")
                                 .message("The access token expired");
