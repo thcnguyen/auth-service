@@ -159,22 +159,15 @@ spec:
         ports:
         - containerPort: ${k8s_container_port}
           name: server
-        resources:
-          requests:
-            memory: "100Mi"
-            cpu: "100m"
-          limits:
-            memory: "200Mi"
-            cpu: "200m"
         livenessProbe:
           httpGet:
-            path: /docgen/actuator/health
+            path: /auth/actuator/health
             port: ${k8s_container_port}
           initialDelaySeconds: 10
           periodSeconds: 5
         readinessProbe:
           httpGet:
-            path: /docgen/actuator/health
+            path: /auth/actuator/health
             port: ${k8s_container_port}
           initialDelaySeconds: 10
           periodSeconds: 5
