@@ -37,8 +37,8 @@ pipeline {
                     k8s_server_host = "undefined"
                     k8s_chart_home = "undefined"
                     k8s_service_node_port = 0
-                    k8s_replicas = 2
                     if ("${env.BRANCH_NAME}" == "develop") {
+                        k8s_replicas = 1
                         k8s_app_env = "dev"
                         k8s_test_port_post = "${k8s_test_port_development}"
                         k8s_namespace = "development"
@@ -47,6 +47,7 @@ pipeline {
                         k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
                         k8s_service_node_port = "${k8s_service_node_port_development}"
                     } else if ("${env.BRANCH_NAME}" == "staging") {
+                        k8s_replicas = 1
                         k8s_app_env = "staging"
                         k8s_test_port_pre = "${k8s_test_port_staging}"
                         k8s_namespace = "staging"
@@ -158,6 +159,13 @@ spec:
         ports:
         - containerPort: ${k8s_container_port}
           name: server
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "100m"
+          limits:
+            memory: "200Mi"
+            cpu: "200m"
         livenessProbe:
           httpGet:
             path: /docgen/actuator/health
