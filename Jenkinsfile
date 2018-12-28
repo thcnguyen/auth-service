@@ -163,13 +163,13 @@ spec:
           httpGet:
             path: /auth/actuator/health
             port: ${k8s_container_port}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 120
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /auth/actuator/health
             port: ${k8s_container_port}
-          initialDelaySeconds: 30
+          initialDelaySeconds: 120
           periodSeconds: 30
       imagePullPolicy: Always
       imagePullSecrets:
