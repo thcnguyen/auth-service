@@ -37,8 +37,8 @@ spring:
   profiles: dev
   datasource:
     url: jdbc:mysql://development.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/development
-    username: development
-    password: BaR#!09Nes$$!Ca
+    username: velotrade
+    password: 3T8zszUcXpHWUK7k
 server:
   web: https://development.velotrade.tech/
 
@@ -57,7 +57,7 @@ spring:
   profiles: staging
   datasource:
     url: jdbc:mysql://staging.c0vty0c0gtfb.ap-southeast-1.rds.amazonaws.com/staging
-    username: staging
+    username: velotrade
     password: Tr1s%TarI$!!80
 server:
   web: https://staging.velotrade.com/
