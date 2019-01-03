@@ -61,9 +61,9 @@ public class UserDAOImpl implements UserDAO {
         } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
             queryBuilder.append("select firstname,lastname,searchableId from introducer where id  =?1");
         } else if (userDTO.getRole().equals(UserRole.CREDIT_ANALYST.name())) {
-            queryBuilder.append("select firstname, lastname from creditAnalyst where id = ?1");
+            queryBuilder.append("select firstname, lastname, cast(null as char) from creditAnalyst where id = ?1");
         } else if (userDTO.getRole().equals(UserRole.DATA_ENTRY.name())) {
-            queryBuilder.append("select firstname, lastname from dataEntry where id = ?1");
+            queryBuilder.append("select firstname, lastname, cast(null as char) from dataEntry where id = ?1");
         }
         if(StringUtils.isEmpty(queryBuilder)) {
             return userDTO;
