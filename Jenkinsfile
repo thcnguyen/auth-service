@@ -191,7 +191,7 @@ spec:
   type: NodePort
 EOF
 
-helm upgrade ${k8s_release_name} ${k8s_chart_home} --install
+helm upgrade ${k8s_release_name} ${k8s_chart_home} --install --namespace ${k8s_namespace}
 
 ENDSSH
 
