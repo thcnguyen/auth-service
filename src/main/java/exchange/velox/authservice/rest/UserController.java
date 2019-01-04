@@ -150,6 +150,8 @@ public class UserController {
         } catch (TokenExpiredException | UserDisabledException e) {
             userService.logout(authorization, true);
             throw e;
+        } catch (HandledHttpException e) {
+            throw e;
         }
         userService.extendToken(authorization);
         return sessionDTO;
