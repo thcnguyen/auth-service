@@ -2,7 +2,6 @@ pipeline {
     agent any
     environment {
         // These variables are the same for all environments
-        k8s_release_name = "auth-release"
         k8s_chart_name = "auth-chart"
         k8s_project_version = readMavenPom().getVersion()
         k8s_image_tag = "${k8s_project_version}.${env.GIT_COMMIT}"
@@ -44,7 +43,6 @@ pipeline {
                         k8s_namespace = "development"
                         k8s_server_username = "ubuntu"
                         k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
-                        k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
                         k8s_service_node_port = "${k8s_service_node_port_development}"
                     } else if ("${env.BRANCH_NAME}" == "staging") {
                         k8s_replicas = 1
@@ -53,11 +51,12 @@ pipeline {
                         k8s_namespace = "staging"
                         k8s_server_username = "ubuntu"
                         k8s_server_host = "ec2-18-136-153-17.ap-southeast-1.compute.amazonaws.com"
-                        k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
                         k8s_service_node_port = "${k8s_service_node_port_staging}"
                     } else {
                         error "Unsupported branch: ${env.BRANCH_NAME}"
                     }
+                    k8s_chart_home = "~/k8s/jenkins/${k8s_namespace}/${k8s_chart_name}"
+                    k8s_release_name = "auth-release-${k8s_namespace}"
                 }
                 sh "echo \"Finished preparing for ${env.BRANCH_NAME} with user $USER\""
             }
