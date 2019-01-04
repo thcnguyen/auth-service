@@ -60,6 +60,10 @@ public class UserDAOImpl implements UserDAO {
                                             "inner join bidderUser bu on b.id = bu.bidder_Id where bu.id =?1");
         } else if (userDTO.getRole().equals(UserRole.INTRODUCER.name())) {
             queryBuilder.append("select firstname,lastname,searchableId from introducer where id  =?1");
+        } else if (userDTO.getRole().equals(UserRole.CREDIT_ANALYST.name())) {
+            queryBuilder.append("select firstname, lastname, cast(null as char) from creditAnalyst where id = ?1");
+        } else if (userDTO.getRole().equals(UserRole.DATA_ENTRY.name())) {
+            queryBuilder.append("select firstname, lastname, cast(null as char) from dataEntry where id = ?1");
         }
         if(StringUtils.isEmpty(queryBuilder)) {
             return userDTO;
@@ -69,9 +73,9 @@ public class UserDAOImpl implements UserDAO {
         try {
             Object[] result = (Object[]) query.getSingleResult();
             if (result != null && result.length > 0) {
-                userDTO.setFirstname(String.valueOf(result[0]));
-                userDTO.setLastname(String.valueOf(result[1]));
-                userDTO.setSearchableId(String.valueOf(result[2]));
+                userDTO.setFirstname((result[0] != null) ? String.valueOf(result[0]) : null);
+                userDTO.setLastname((result[1] != null) ? String.valueOf(result[1]) : null);
+                userDTO.setSearchableId((result[2] != null) ? String.valueOf(result[2]) : null);
             }
         } catch (Exception e) {
             // ignore

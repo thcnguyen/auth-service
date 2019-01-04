@@ -104,9 +104,11 @@ public class UserService {
     @Transactional
     public void extendToken(String token) {
         Optional<UserSession> sessionOpt = userSessionDAO.findUserSessionByToken(token);
-        UserSession session = sessionOpt.get();
-        session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
-        userSessionDAO.save(session);
+        if (sessionOpt.isPresent()) {
+            UserSession session = sessionOpt.get();
+            session.setExpireDate(System.currentTimeMillis() + AuthConfig.MAX_SESSION_TIME);
+            userSessionDAO.save(session);
+        }
     }
 
     @Transactional
