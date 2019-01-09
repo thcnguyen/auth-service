@@ -13,6 +13,7 @@ public class UserSessionDTO {
     private Set<String> permissions = new HashSet<>();
     private Map<String, Object> extraData = new HashMap<>();
     private Boolean totpRequiredAtLogin;
+    private String companyId;
 
     public String getId() {
         return id;
@@ -68,5 +69,13 @@ public class UserSessionDTO {
 
     public void setTotpRequiredAtLogin(Boolean totpRequiredAtLogin) {
         this.totpRequiredAtLogin = totpRequiredAtLogin;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
     }
 }

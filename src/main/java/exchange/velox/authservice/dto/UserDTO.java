@@ -18,6 +18,7 @@ public class UserDTO {
     private String lastname;
     private String searchableId;
     private Boolean totpRequiredAtLogin;
+    private String companyId;
 
     private int loginAttempt = 0;
 
@@ -168,6 +169,14 @@ public class UserDTO {
             return "E";
         }
         return null;
+    }
+
+    public String getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(String companyId) {
+        this.companyId = companyId;
     }
 }
 

@@ -31,6 +31,7 @@ public class UtilsService {
         session.setRole(user.getRole());
         session.setPermissions(user.getPermissions());
         session.setTotpRequiredAtLogin(user.getTotpRequiredAtLogin());
+        session.setCompanyId(user.getCompanyId());
         return session;
     }
 

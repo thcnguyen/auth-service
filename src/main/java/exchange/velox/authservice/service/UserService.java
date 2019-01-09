@@ -84,6 +84,7 @@ public class UserService {
         if (sessionOpt.isPresent()) {
             UserSession session = sessionOpt.get();
             UserDTO user = userDAO.load(session.getUserId());
+            user = userDAO.enrichUserInfo(user);
 
             if (ClientType.WEB.equals(session.getClientType())) {
                 if (!checkTimeValidityCondition(session.getExpireDate()))
@@ -111,7 +112,6 @@ public class UserService {
         }
     }
 
-    @Transactional
     public UserDTO findUserByEmail(String email) {
         UserDTO user = userDAO.findUserByEmail(email);
         if (user != null) {
