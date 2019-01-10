@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserSessionDAO extends CrudRepository<UserSession, Long> {
+public interface UserSessionDAO extends CrudRepository<UserSession, String> {
     Optional<UserSession> findUserSessionByUserId(String userId);
 
     Optional<List<UserSession>> findUserSessionsByUserId(String userId);

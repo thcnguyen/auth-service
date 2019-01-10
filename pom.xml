@@ -28,7 +28,7 @@
 		<disruptor.version>3.4.2</disruptor.version>
 		<jackson.version>2.9.8</jackson.version>
 		<log4j2.version>2.11.1</log4j2.version>
-
+		<flyway.version>5.2.4</flyway.version>
 	</properties>
 
 	<dependencies>
@@ -149,6 +149,12 @@
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
 			<version>${disruptor.version}</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-maven-plugin</artifactId>
+			<version>${flyway.version}</version>
 		</dependency>
 
 		<!-- TEST -->

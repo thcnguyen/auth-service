@@ -1,4 +1,6 @@
 spring:
+  flyway:
+    enabled: false
   profiles: test
   datasource:
     driver: org.hsqldb.jdbcDriver

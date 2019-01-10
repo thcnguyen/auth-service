@@ -1,14 +1,14 @@
 package exchange.velox.authservice.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import exchange.velox.authservice.dto.ClientType;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "userSession")
 public class UserSession {
-    private Long id;
+    private String id;
     private String userId;
     private String token;
     private ClientType clientType;
@@ -16,13 +16,15 @@ public class UserSession {
     private String userAgent;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    public Long getId() {
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(
+                name = "UUID",
+                strategy = "org.hibernate.id.UUIDGenerator")
+    public String getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
